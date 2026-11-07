@@ -161,3 +161,92 @@ export default function DashboardUI({ onLock, onLogout, user }) {
             )}
           </div>
         )}
+        {activeTab === 'To collect' && (
+          <div className="bg-white p-8 rounded-3xl border border-amber-100/80 shadow-sm space-y-4">
+            <h3 className="text-sm font-black text-slate-900">Customer Dues & Udhari Ledger</h3>
+            {transactions.filter(t => t.paymentMode === 'Credit').length === 0 ? (
+              <p className="text-xs text-slate-400">No pending credit or udhari entries.</p>
+            ) : (
+              transactions.filter(t => t.paymentMode === 'Credit').map(t => (
+                <div key={t.id} className="flex justify-between items-center p-4 bg-amber-50/40 rounded-2xl border border-amber-200 text-xs">
+                  <div>
+                    <p className="font-black text-slate-900">{t.text}</p>
+                    <p className="text-[10px] text-amber-800">Date: {t.date} • Category: {t.category}</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="font-black text-rose-600">₹{t.amount}</span>
+                    <button 
+                      onClick={() => {
+                        const updated = transactions.map(item => item.id === t.id ? {...item, paymentMode: 'Online'} : item);
+                        setTransactions(updated);
+                        localStorage.setItem('arthved_transactions', JSON.stringify(updated));
+                      }}
+                      className="px-3 py-2 bg-amber-800 text-white font-bold rounded-xl text-[11px] cursor-pointer"
+                    >
+                      Mark Collected ✓
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {activeTab === 'Reports' && (
+          <div className="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm space-y-4">
+            <h3 className="text-sm font-black text-slate-900">Reports & Analytics</h3>
+            <p className="text-xs text-slate-500">Total recorded transactions: {transactions.length}</p>
+          </div>
+        )}
+
+        {activeTab === 'Business setup' && (
+          <div className="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm space-y-4">
+            <h3 className="text-sm font-black text-slate-900">Business Setup & Vault Options</h3>
+            <button onClick={onLogout || onLock} className="px-4 py-2.5 bg-rose-600 text-white text-xs font-bold rounded-xl cursor-pointer">
+              Sign Out / Lock Vault
+            </button>
+          </div>
+        )}
+      </main>
+
+      {showModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full border border-amber-100 space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-black uppercase text-slate-900">Record {modalType}</h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-700 font-bold text-xl cursor-pointer p-1">&times;</button>
+            </div>
+            <form onSubmit={handleAddTransaction} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">Description / Party Name</label>
+                <input type="text" required value={text} onChange={(e) => setText(e.target.value)} className="w-full px-4 py-2.5 border border-amber-200 rounded-xl text-xs bg-amber-50/20" placeholder="e.g. Sharma Ji" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">Amount (₹)</label>
+                <input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full px-4 py-2.5 border border-amber-200 rounded-xl text-xs bg-amber-50/20" placeholder="0.00" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">Payment Mode</label>
+                <select value={paymentMode} onChange={(e) => setPaymentMode(e.target.value)} className="w-full px-4 py-2.5 border border-amber-200 rounded-xl text-xs bg-white cursor-pointer">
+                  <option value="Cash">Cash</option>
+                  <option value="Online">Online / UPI</option>
+                  <option value="Credit">Credit / Udhari</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">Category</label>
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-2.5 border border-amber-200 rounded-xl text-xs bg-white cursor-pointer">
+                  <option value="General">General</option>
+                  <option value="Sales">Sales</option>
+                  <option value="Inventory">Inventory</option>
+                  <option value="Utilities">Utilities</option>
+                </select>
+              </div>
+              <button type="submit" className="w-full py-3 bg-amber-800 text-white text-xs font-black rounded-xl cursor-pointer">Save Record 🪔</button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
