@@ -464,7 +464,7 @@ export default function DashboardUI({ onLock, onLogout, user }) {
               
               <div>
                 <label className="block text-xs font-bold text-slate-600 mb-1">Payment Mode</label>
-                <select value={paymentMode} onChange={(e) => setPaymentMode(e.target.value)} className="w-full px-4 py-2.5 border border-amber-200 rounded-xl text-xs bg-white">
+                <select value={paymentMode} onChange={(e) => setPaymentPaymentMode ? setPaymentPaymentMode(e.target.value) : setPaymentMode(e.target.value)} className="w-full px-4 py-2.5 border border-amber-200 rounded-xl text-xs bg-white">
                   <option value="Cash">Cash</option>
                   <option value="Online">Online / UPI</option>
                   <option value="Credit">Credit / Udhari (Still to collect)</option>
@@ -488,7 +488,7 @@ export default function DashboardUI({ onLock, onLogout, user }) {
       )}
 
       {showImportModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowImportModal(false)}>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowImportModal(true)}>
           <div className="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full border border-amber-100 space-y-4" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-sm font-black uppercase text-slate-900">Import CSV / Backup</h3>
             <input type="file" accept=".csv,.hisab,.json" onChange={handleFileUpload} className="w-full text-xs text-slate-500" />
