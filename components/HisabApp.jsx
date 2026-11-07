@@ -63,16 +63,24 @@ export default function HisabApp() {
       ) : !isAuthenticated ? (
         <div className="flex flex-col items-center justify-center min-h-screen p-4">
           <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-amber-100 text-center">
-            <h2 className="text-2xl font-bold text-amber-700 mb-2">Arthved Vault Locked</h2>
-            <p className="text-sm text-slate-500 mb-6">Enter your 4-digit PIN or Password to unlock your secure ledger.</p>
+            <div className="flex justify-center mb-3">
+              <div className="w-12 h-12 bg-gradient-to-tr from-amber-600 to-amber-400 rounded-2xl flex items-center justify-center shadow-md text-white">
+                👁️
+              </div>
+            </div>
+            <div className="mb-4 inline-block bg-amber-100/80 border border-amber-300 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider">
+              🪔 SHUBH LABH • FINANCIAL SCIENCE & VISION
+            </div>
+            <h2 className="text-2xl font-black text-slate-900 mb-1">Arthved</h2>
+            <p className="text-xs text-slate-500 mb-6">Surya ki urja, Nayan ki drishti — har hisab ekdam saaf.</p>
             
             <input 
               type="password" 
               value={enteredPin}
               onChange={(e) => setEnteredPin(e.target.value)}
-              placeholder="Enter PIN" 
-              className={`w-full px-4 py-3 border rounded-xl mb-2 focus:outline-none text-center tracking-widest text-lg ${
-                pinError ? 'border-red-500' : 'border-slate-200'
+              placeholder="Enter 4-digit PIN or Password" 
+              className={`w-full px-4 py-3 border rounded-xl mb-2 focus:outline-none text-center tracking-widest text-sm bg-amber-50/20 ${
+                pinError ? 'border-red-500' : 'border-amber-200'
               }`}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleUnlock();
@@ -84,17 +92,19 @@ export default function HisabApp() {
             
             <button 
               onClick={handleUnlock}
-              className="w-full py-3 bg-amber-800 hover:bg-amber-900 text-white font-semibold rounded-xl transition shadow-md mt-2 cursor-pointer"
+              className="w-full py-3.5 bg-[#a34407] hover:bg-[#853705] text-white font-black text-xs rounded-xl transition shadow-md mt-2 cursor-pointer uppercase tracking-wider"
             >
               Unlock Dashboard 🔓
             </button>
 
             <button 
               onClick={() => setShowRecovery(true)}
-              className="mt-4 text-xs text-amber-700 hover:underline block mx-auto font-medium cursor-pointer"
+              className="mt-4 text-xs text-amber-800 hover:underline block mx-auto font-bold cursor-pointer"
             >
               Forgot PIN? Recover via WhatsApp or Email 📱
             </button>
+
+            <p className="text-[10px] text-slate-400 mt-6 font-medium">Local-First Zero-Knowledge AES Encrypted Secure Vault</p>
           </div>
         </div>
       ) : (
