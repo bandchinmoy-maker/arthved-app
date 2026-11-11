@@ -62,7 +62,7 @@ const ramayanaCharacters = [
   }
 ];
 
-export default function DashboardUI() {
+export default function DashboardUI({ onLock, onLogout, user }) {
   const [transactions, setTransactions] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -127,12 +127,20 @@ export default function DashboardUI() {
           </h1>
           <p className="text-xs text-slate-600 mt-1">Dharmik Niti aur Vanara Sena ke prabandh par aadharit financial vault.</p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="mt-4 md:mt-0 bg-amber-800 hover:bg-amber-900 text-amber-50 px-5 py-2.5 rounded-xl font-bold shadow-md transition-all flex items-center gap-2"
-        >
-          <span>➕</span> Naya Lekha Jodein (Add Transaction)
-        </button>
+        <div className="flex items-center gap-3 mt-4 md:mt-0">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-4 py-2 rounded-xl font-bold text-sm shadow-md transition-all flex items-center gap-2"
+          >
+            <span>➕</span> Add Sale
+          </button>
+          <button
+            onClick={onLock}
+            className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-xl font-bold text-xs"
+          >
+            Lock Vault 🔒
+          </button>
+        </div>
       </header>
 
       {/* Main Stats Cards */}
@@ -247,8 +255,9 @@ export default function DashboardUI() {
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-amber-100">
               <h3 className="text-lg font-bold text-amber-900">Naya Karma Lekha Jodein</h3>
               <button 
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-rose-600 text-xl font-bold p-1 rounded-lg hover:bg-rose-50 transition-colors"
+                className="text-slate-400 hover:text-rose-600 text-xl font-bold p-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
                 title="Cancel"
               >
                 ✕
@@ -323,14 +332,14 @@ export default function DashboardUI() {
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+                  className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-5 py-2 rounded-xl text-sm font-bold shadow-md transition-all"
+                  className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-5 py-2 rounded-xl text-sm font-bold shadow-md transition-all cursor-pointer"
                 >
                   {loading ? 'Surakshit ho raha hai...' : 'Surakshit Karein'}
                 </button>
