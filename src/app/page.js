@@ -3,14 +3,14 @@
 import React, { useState, useEffect } from 'react'
 
 const ramayanaSlides = [
-  { name: "Shri Ram (श्री राम)", title: "Maryada Purushottam — The Supreme Ideal", deed: "Pita ke vachan hetu 14 varsh ka vanvas sweekar kiya aur asatya par satya ki vijay sthapit karke maryada ka adarsh sthapit kiya.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Lord_Rama_drawing.jpg/440px-Lord_Rama_drawing.jpg", badge: "Divine Epitome" },
-  { name: "Mata Sita (माता सीता)", title: "Pavitrata & Tyag ki Moorti", deed: "Rajya ke sabhi sukhon ka tyag karke vanvas mein sahayatri bani, atulya dhairya aur aatma-bal ka sacha parichay diya.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Sita_Ram_Lakshman_Hanuman.jpg/500px-Sita_Ram_Lakshman_Hanuman.jpg", badge: "Grace & Resilience" },
-  { name: "Lakshman ji (लक्ष्मण जी)", title: "Bhratruprem & Nishtha", deed: "Bina ek pal soche bade bhai Shri Ram aur bhabhi ke sath vanvas gaye aur din-raat adig pehra dekar lakshman rekha ki maryada rakhi.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Lakshmana_in_Ramayana.jpg/400px-Lakshmana_in_Ramayana.jpg", badge: "Eternal Loyalty" },
-  { name: "Hanuman ji (हनुमान जी)", title: "Pawanputra & Sankat Mochan", deed: "Samudra langh kar Lanka mein Mata Sita ki khoj ki, Lanka dahan kiya aur Sanjeevani booti laakar lakshman ji ke pran bachaye.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Lord_Hanuman.jpg/440px-Lord_Hanuman.jpg", badge: "Supreme Devotee" },
-  { name: "Jatayu (जटायु)", title: "Param Pakshiraj & Yoddha", deed: "Mata Sita ki raksha ke liye akash mein Ravan se bhayanak yuddh kiya aur dharm ke liye apne praan samarpit kiye.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Jatayu_Fights_Ravana.jpg/500px-Jatayu_Fights_Ravana.jpg", badge: "Brave Protector" },
-  { name: "Sugriva & Angada (सुग्रीव व अंगद)", title: "Kishkindha Leaders", deed: "Shri Ram ke sath sachha mitrata ka vachan nibhaya aur mahan Vanara sena ka netritva karke adharm ka nash kiya.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Sugriva_fighting_Vali.jpg/500px-Sugriva_fighting_Vali.jpg", badge: "Vanara Strength" },
-  { name: "Jambavan (जाम्बवान जी)", title: "Riksharaj & Wise Elder", deed: "Apni agya aur gyan se Hanuman ji ko unki alaukik shaktiyon ka smaran karaya aur yuddh mein param margdarshan diya.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Jambavan.jpg/400px-Jambavan.jpg", badge: "Divine Wisdom" },
-  { name: "Nala & Nila (नल और नीलकंठ)", title: "Divine Architects", deed: "Vishwakarma ke aashirwad aur gyan se samudra par mahan 'Ram Setu' ka nirmaan kiya jisse sena Lanka pahunchi.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rama_Setu_Construction.jpg/500px-Rama_Setu_Construction.jpg", badge: "Master Engineers" }
+  { name: "Shri Ram (श्री राम)", title: "Maryada Purushottam — The Supreme Ideal", deed: "Pita ke vachan hetu 14 varsh ka vanvas sweekar kiya aur asatya par satya ki vijay sthapit karke maryada ka adarsh sthapit kiya.", symbol: "🏹", badge: "Divine Epitome" },
+  { name: "Mata Sita (माता सीता)", title: "Pavitrata & Tyag ki Moorti", deed: "Rajya ke sabhi sukhon ka tyag karke vanvas mein sahayatri bani, atulya dhairya aur aatma-bal ka sacha parichay diya.", symbol: "🪷", badge: "Grace & Resilience" },
+  { name: "Lakshman ji (लक्ष्मण जी)", title: "Bhratruprem & Nishtha", deed: "Bina ek pal soche bade bhai Shri Ram aur bhabhi ke sath vanvas gaye aur din-raat adig pehra dekar lakshman rekha ki maryada rakhi.", symbol: "🛡️", badge: "Eternal Loyalty" },
+  { name: "Hanuman ji (हनुमान जी)", title: "Pawanputra & Sankat Mochan", deed: "Samudra langh kar Lanka mein Mata Sita ki khoj ki, Lanka dahan kiya aur Sanjeevani booti laakar lakshman ji ke pran bachaye.", symbol: "🏔️", badge: "Supreme Devotee" },
+  { name: "Jatayu (जटायु)", title: "Param Pakshiraj & Yoddha", deed: "Mata Sita ki raksha ke liye akash mein Ravan se bhayanak yuddh kiya aur dharm ke liye apne praan samarpit kiye.", symbol: "🦅", badge: "Brave Protector" },
+  { name: "Sugriva & Angada (सुग्रीव व अंगद)", title: "Kishkindha Leaders", deed: "Shri Ram ke sath sachha mitrata ka vachan nibhaya aur mahan Vanara sena ka netritva karke adharm ka nash kiya.", symbol: "🤝", badge: "Vanara Strength" },
+  { name: "Jambavan (जाम्बवान जी)", title: "Riksharaj & Wise Elder", deed: "Apni agya aur gyan se Hanuman ji ko unki alaukik shaktiyon ka smaran karaya aur yuddh mein param margdarshan diya.", symbol: "🐻", badge: "Divine Wisdom" },
+  { name: "Nala & Nila (नल और नीलकंठ)", title: "Divine Architects", deed: "Vishwakarma ke aashirwad aur gyan se samudra par mahan 'Ram Setu' ka nirmaan kiya jisse sena Lanka pahunchi.", symbol: "🌉", badge: "Master Engineers" }
 ];
 
 const TABS = ['Overview', 'Transactions', 'To collect', 'Reports', 'Business setup'];
@@ -22,6 +22,25 @@ const inputCls = 'w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm 
 const labelCls = 'block text-xs font-bold text-slate-700 uppercase mb-1';
 const primaryBtn = 'w-full py-3.5 bg-amber-800 hover:bg-amber-900 text-white font-bold text-sm rounded-xl shadow-md transition cursor-pointer';
 const emptyTx = { text: '', amount: '', type: 'income', category: 'General', paymentMode: 'Cash' };
+
+const AnimStyles = () => (
+  <style>{`
+    @keyframes av-rise{from{opacity:0;transform:translateY(24px) scale(.8)}to{opacity:1;transform:none}}
+    @keyframes av-shine{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+    @keyframes av-flame{0%,100%{transform:scale(1) rotate(-3deg);filter:drop-shadow(0 0 6px #f59e0b)}50%{transform:scale(1.12) rotate(3deg);filter:drop-shadow(0 0 16px #fbbf24)}}
+    @keyframes av-glow{0%,100%{box-shadow:0 0 25px 4px rgba(245,158,11,.35)}50%{box-shadow:0 0 55px 14px rgba(245,158,11,.6)}}
+    @keyframes av-spin{to{transform:rotate(360deg)}}
+    @keyframes av-fade{from{opacity:0}to{opacity:1}}
+    @keyframes av-pop{from{opacity:0;transform:scale(.7) rotate(-6deg)}to{opacity:1;transform:none}}
+    .av-letter{display:inline-block;background:linear-gradient(90deg,#b45309,#fbbf24,#fff7d6,#fbbf24,#b45309);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:av-rise .7s ease-out both,av-shine 3s linear infinite}
+    .av-title{background:linear-gradient(90deg,#78350f,#d97706,#78350f);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:av-shine 4s linear infinite}
+    .av-flame{display:inline-block;animation:av-flame 1.6s ease-in-out infinite}
+    .av-glow{animation:av-glow 2.4s ease-in-out infinite}
+    .av-ring{animation:av-spin 12s linear infinite}
+    .av-fade{animation:av-fade 1.5s ease-out 1.2s both}
+    .av-pop{animation:av-pop .6s ease-out both}
+  `}</style>
+);
 
 export default function HisabApp() {
   const [step, setStep] = useState('loading');
@@ -35,6 +54,43 @@ export default function HisabApp() {
   const [transactions, setTransactions] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [txData, setTxData] = useState(emptyTx);
+  const [dues, setDues] = useState([]);
+  const [dueForm, setDueForm] = useState({ party: '', amount: '', dueDate: '' });
+  const [biz, setBiz] = useState({ name: '', owner: '', gstin: '', phone: '', address: '' });
+  const [bizSaved, setBizSaved] = useState(false);
+
+  const saveDues = (list) => { setDues(list); localStorage.setItem('arthved_dues', JSON.stringify(list)); };
+  const addDue = (e) => {
+    e.preventDefault();
+    if (!dueForm.party || !dueForm.amount) return;
+    saveDues([{ id: Date.now(), party: dueForm.party, amount: parseFloat(dueForm.amount), dueDate: dueForm.dueDate }, ...dues]);
+    setDueForm({ party: '', amount: '', dueDate: '' });
+  };
+  const receiveDue = (due) => {
+    const newTx = { id: Date.now(), text: `Received from ${due.party}`, amount: due.amount, type: 'income', category: 'Udhaar Wapasi', paymentMode: 'Cash', date: new Date().toLocaleDateString() };
+    const updated = [newTx, ...transactions];
+    setTransactions(updated);
+    localStorage.setItem('arthved_tx', JSON.stringify(updated));
+    saveDues(dues.filter((d) => d.id !== due.id));
+  };
+  const deleteDue = (id) => saveDues(dues.filter((d) => d.id !== id));
+  const saveBiz = (e) => {
+    e.preventDefault();
+    localStorage.setItem('arthved_biz', JSON.stringify(biz));
+    setBizSaved(true);
+    setTimeout(() => setBizSaved(false), 2500);
+  };
+  const downloadCSV = () => {
+    const rows = [['Date', 'Description', 'Category', 'Payment Mode', 'Type', 'Amount'], ...transactions.map((t) => [t.date, t.text, t.category, t.paymentMode, t.type, t.amount])];
+    const csv = rows.map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'arthved-report.csv';
+    a.click();
+  };
+  const totalDue = dues.reduce((a, d) => a + d.amount, 0);
+  const byCategory = Object.entries(transactions.filter((t) => t.type === 'expense').reduce((m, t) => { const k = t.category || 'General'; m[k] = (m[k] || 0) + t.amount; return m; }, {})).sort((a, b) => b[1] - a[1]);
+  const byMode = Object.entries(transactions.reduce((m, t) => { const k = t.paymentMode || 'Cash'; m[k] = (m[k] || 0) + t.amount; return m; }, {}));
 
   // Splash screen: also loads saved transactions
   useEffect(() => {
@@ -45,8 +101,16 @@ export default function HisabApp() {
       } catch (err) {
         console.error('Could not read saved transactions', err);
       }
+      try {
+        const savedDues = localStorage.getItem('arthved_dues');
+        if (savedDues) setDues(JSON.parse(savedDues));
+        const savedBiz = localStorage.getItem('arthved_biz');
+        if (savedBiz) setBiz(JSON.parse(savedBiz));
+      } catch (err) {
+        console.error('Could not read saved data', err);
+      }
       setStep(localStorage.getItem('arthved_user') ? 'login' : 'welcome');
-    }, 2000);
+    }, 2600);
     return () => clearTimeout(timer);
   }, []);
 
@@ -85,7 +149,11 @@ export default function HisabApp() {
   const handleResetVault = () => {
     localStorage.removeItem('arthved_user');
     localStorage.removeItem('arthved_tx');
+    localStorage.removeItem('arthved_dues');
+    localStorage.removeItem('arthved_biz');
     setTransactions([]);
+    setDues([]);
+    setBiz({ name: '', owner: '', gstin: '', phone: '', address: '' });
     setStep('welcome');
   };
 
@@ -112,10 +180,20 @@ export default function HisabApp() {
 
   if (step === 'loading') {
     return (
-      <div className="min-h-screen bg-[#120f0c] flex flex-col items-center justify-center font-sans text-amber-100">
-        <div className="w-24 h-24 bg-gradient-to-tr from-amber-600 to-amber-400 rounded-3xl flex items-center justify-center shadow-2xl text-4xl animate-bounce mb-6 border border-amber-300/30">🪔</div>
-        <h1 className="text-4xl font-black tracking-widest text-amber-500 animate-pulse">ARTHVED</h1>
-        <p className="text-xs text-amber-200/60 mt-2 font-medium tracking-wider uppercase">Financial Science & Vision • Ayodhya Edition</p>
+      <div className="min-h-screen bg-[#120f0c] flex flex-col items-center justify-center font-sans text-amber-100 overflow-hidden">
+        <AnimStyles />
+        <div className="relative mb-8">
+          <div className="av-ring absolute -inset-6 rounded-full border-2 border-dashed border-amber-500/40"></div>
+          <div className="av-glow w-28 h-28 bg-gradient-to-tr from-amber-600 to-amber-400 rounded-full flex items-center justify-center text-5xl border border-amber-300/40">
+            <span className="av-flame">🪔</span>
+          </div>
+        </div>
+        <h1 className="text-4xl md:text-5xl font-black flex gap-1 md:gap-2">
+          {'ARTHVED'.split('').map((ch, i) => (
+            <span key={i} className="av-letter" style={{ animationDelay: `${i * 0.12}s, 0s` }}>{ch}</span>
+          ))}
+        </h1>
+        <p className="av-fade text-xs text-amber-200/60 mt-3 font-medium tracking-wider uppercase">Financial Science & Vision • Ayodhya Edition</p>
       </div>
     );
   }
@@ -231,12 +309,13 @@ export default function HisabApp() {
 
   return (
     <div className="min-h-screen bg-[#fefcf6] text-slate-800 flex font-sans">
+      <AnimStyles />
       <aside className="w-64 bg-white border-r border-amber-200 hidden md:flex flex-col justify-between p-6 shadow-sm">
         <div>
           <div className="flex items-center gap-3 mb-8 pb-4 border-b border-amber-100">
-            <span className="text-2xl">🪷</span>
+            <span className="av-flame text-3xl">🪔</span>
             <div>
-              <h1 className="font-black text-amber-900 text-lg leading-tight">ArthVed</h1>
+              <h1 className="av-title font-black text-lg leading-tight">ArthVed</h1>
               <p className="text-[10px] text-amber-600 font-bold uppercase tracking-wider">Ayodhya Edition</p>
             </div>
           </div>
@@ -290,12 +369,10 @@ export default function HisabApp() {
         {/* Ramayana banner now shows only on Overview */}
         {activeTab === 'Overview' && (
           <div className="relative w-full rounded-3xl overflow-hidden shadow-xl border border-amber-300 mb-8 bg-slate-900 text-white min-h-[320px] flex items-center">
-            <div className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-30" style={{ backgroundImage: `url(${slide.image})` }}></div>
+            <div key={"bg"+currentSlide} className="av-pop absolute inset-y-0 right-0 pr-8 flex items-center text-[13rem] opacity-10 select-none pointer-events-none">{slide.symbol}</div>
             <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-transparent"></div>
             <div className="relative z-10 p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 w-full">
-              <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl overflow-hidden border-2 border-amber-400/80 shadow-2xl flex-shrink-0 bg-amber-950">
-                <img src={slide.image} alt={slide.name} className="w-full h-full object-cover" />
-              </div>
+              <div key={currentSlide} className="av-pop w-28 h-28 md:w-36 md:h-36 rounded-2xl border-2 border-amber-400/80 shadow-2xl flex-shrink-0 bg-gradient-to-br from-amber-800 to-amber-950 flex items-center justify-center text-6xl md:text-7xl">{slide.symbol}</div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className="bg-amber-500 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow">{slide.badge}</span>
@@ -336,11 +413,100 @@ export default function HisabApp() {
 
         {activeTab === 'Transactions' && txTable}
 
-        {activeTab !== 'Overview' && activeTab !== 'Transactions' && (
-          <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-8 text-center">
-            <h3 className="text-xl font-bold text-amber-900 mb-2">{activeTab}</h3>
-            <p className="text-sm text-slate-500">Yeh section jald aa raha hai (coming soon).</p>
+        {activeTab === 'To collect' && (
+          <div className="space-y-6 mb-12">
+            <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Baaki (To Collect)</p>
+              <h3 className="text-2xl font-black mt-2 text-amber-700">₹ {totalDue.toLocaleString()}</h3>
+            </div>
+            <form onSubmit={addDue} className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div><label className={labelCls}>Party Name</label><input type="text" required placeholder="Jaise: Sharma ji" value={dueForm.party} onChange={(e) => setDueForm({ ...dueForm, party: e.target.value })} className={inputCls} /></div>
+              <div><label className={labelCls}>Rashi (₹)</label><input type="number" required min="0" step="0.01" placeholder="0.00" value={dueForm.amount} onChange={(e) => setDueForm({ ...dueForm, amount: e.target.value })} className={inputCls} /></div>
+              <div><label className={labelCls}>Due Date</label><input type="date" value={dueForm.dueDate} onChange={(e) => setDueForm({ ...dueForm, dueDate: e.target.value })} className={inputCls} /></div>
+              <button type="submit" className={primaryBtn}>➕ Add Baaki</button>
+            </form>
+            <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6">
+              <h2 className="text-xl font-bold text-amber-900 mb-4">📥 Wasooli List</h2>
+              {dues.length === 0 ? (
+                <p className="text-sm text-slate-500 py-8 text-center">Koi baaki nahi hai. Sab hisab saaf! 🎉</p>
+              ) : (
+                <div className="divide-y divide-amber-50">
+                  {dues.map((d) => {
+                    const overdue = d.dueDate && new Date(d.dueDate) < new Date();
+                    return (
+                      <div key={d.id} className="py-3 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-slate-800">{d.party}</p>
+                          <p className={`text-xs ${overdue ? 'text-rose-600 font-bold' : 'text-slate-500'}`}>{d.dueDate ? `Due: ${d.dueDate}${overdue ? ' (late)' : ''}` : 'No due date'}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-amber-700">₹ {d.amount.toLocaleString()}</span>
+                          <button onClick={() => receiveDue(d)} className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg cursor-pointer">✔ Mila</button>
+                          <button onClick={() => { if (window.confirm('Delete this entry?')) deleteDue(d.id); }} className="text-slate-400 hover:text-rose-600 text-sm cursor-pointer">🗑️</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
+        )}
+
+        {activeTab === 'Reports' && (
+          <div className="space-y-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {[['Aagman (Income)', totalIncome, 'text-emerald-600'], ['Vyaya (Expense)', totalExpense, 'text-rose-600'], ['Net Balance', netBalance, netBalance >= 0 ? 'text-emerald-700' : 'text-rose-700'], ['Baaki (To Collect)', totalDue, 'text-amber-700']].map(([label, val, cls]) => (
+                <div key={label} className="bg-white p-5 rounded-2xl border border-amber-200 shadow-sm">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</p>
+                  <h3 className={`text-xl font-black mt-2 ${cls}`}>₹ {val.toLocaleString()}</h3>
+                </div>
+              ))}
+            </div>
+            <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-2">
+                <h2 className="text-xl font-bold text-amber-900">📈 Bachat (Savings): {totalIncome > 0 ? Math.round((netBalance / totalIncome) * 100) : 0}% of income</h2>
+                <button onClick={downloadCSV} disabled={transactions.length === 0} className="bg-amber-800 hover:bg-amber-900 disabled:opacity-40 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer">⬇ Download CSV (Excel)</button>
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6">
+              <h2 className="text-lg font-bold text-amber-900 mb-4">Kharcha by Category</h2>
+              {byCategory.length === 0 ? <p className="text-sm text-slate-500 py-4 text-center">Abhi koi kharcha darj nahi hai.</p> : byCategory.map(([cat, amt]) => (
+                <div key={cat} className="mb-3">
+                  <div className="flex justify-between text-xs font-bold text-slate-700 mb-1"><span>{cat}</span><span>₹ {amt.toLocaleString()} ({Math.round((amt / totalExpense) * 100)}%)</span></div>
+                  <div className="h-2.5 bg-amber-100 rounded-full overflow-hidden"><div className="h-full bg-amber-600 rounded-full transition-all duration-700" style={{ width: `${(amt / totalExpense) * 100}%` }}></div></div>
+                </div>
+              ))}
+            </div>
+            <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6">
+              <h2 className="text-lg font-bold text-amber-900 mb-4">Payment Mode</h2>
+              {byMode.length === 0 ? <p className="text-sm text-slate-500 py-4 text-center">Abhi koi len-den nahi hai.</p> : (
+                <div className="flex flex-wrap gap-3">
+                  {byMode.map(([mode, amt]) => (
+                    <div key={mode} className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                      <p className="text-xs font-bold text-amber-900 uppercase">{mode}</p>
+                      <p className="font-black text-slate-800">₹ {amt.toLocaleString()}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'Business setup' && (
+          <form onSubmit={saveBiz} className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6 max-w-2xl space-y-4 mb-12">
+            <h2 className="text-xl font-bold text-amber-900">⚙️ Vyapaar ki Jaankari</h2>
+            <div><label className={labelCls}>Business Name</label><input type="text" placeholder="Jaise: Sharma General Store" value={biz.name} onChange={(e) => setBiz({ ...biz, name: e.target.value })} className={inputCls} /></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><label className={labelCls}>Owner Name</label><input type="text" value={biz.owner} onChange={(e) => setBiz({ ...biz, owner: e.target.value })} className={inputCls} /></div>
+              <div><label className={labelCls}>Phone</label><input type="text" value={biz.phone} onChange={(e) => setBiz({ ...biz, phone: e.target.value })} className={inputCls} /></div>
+            </div>
+            <div><label className={labelCls}>GSTIN (optional)</label><input type="text" maxLength={15} placeholder="15-character GST number" value={biz.gstin} onChange={(e) => setBiz({ ...biz, gstin: e.target.value.toUpperCase() })} className={inputCls + ' tracking-widest'} /></div>
+            <div><label className={labelCls}>Address</label><textarea rows={3} value={biz.address} onChange={(e) => setBiz({ ...biz, address: e.target.value })} className={inputCls}></textarea></div>
+            <button type="submit" className={primaryBtn}>Surakshit Karein 💾</button>
+            {bizSaved && <p className="text-sm text-emerald-600 font-bold text-center">✔ Saved on this device!</p>}
+          </form>
         )}
       </main>
 
