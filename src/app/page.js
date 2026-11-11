@@ -1,4 +1,4 @@
-'use content'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 
@@ -7,56 +7,56 @@ const ramayanaSlides = [
     name: "Shri Ram (श्री राम)",
     title: "Maryada Purushottam — The Supreme Ideal",
     deed: "Pita ke vachan hetu 14 varsh ka vanvas sweekar kiya aur asatya par satya ki vijay sthapit karke maryada ka adarsh sthapit kiya.",
-    image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop", // Divine Indian Art Depiction
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Lord_Rama_drawing.jpg/440px-Lord_Rama_drawing.jpg",
     badge: "Divine Epitome"
   },
   {
     name: "Mata Sita (माता सीता)",
     title: "Pavitrata & Tyag ki Moorti",
     deed: "Rajya ke sabhi sukhon ka tyag karke vanvas mein sahayatri bani, atulya dhairya aur aatma-bal ka sacha parichay diya.",
-    image: "https://images.unsplash.com/photo-1609342122563-a43ac8917a3a?q=80&w=1000&auto=format&fit=crop", 
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Sita_Ram_Lakshman_Hanuman.jpg/500px-Sita_Ram_Lakshman_Hanuman.jpg",
     badge: "Grace & Resilience"
   },
   {
     name: "Lakshman ji (लक्ष्मण जी)",
     title: "Bhratruprem & Nishtha",
     deed: "Bina ek pal soche bade bhai Shri Ram aur bhabhi ke sath vanvas gaye aur din-raat adig pehra dekar lakshman rekha ki maryada rakhi.",
-    image: "https://images.unsplash.com/photo-1590073844006-33379778ae09?q=80&w=1000&auto=format&fit=crop",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Lakshmana_in_Ramayana.jpg/400px-Lakshmana_in_Ramayana.jpg",
     badge: "Eternal Loyalty"
   },
   {
     name: "Hanuman ji (हनुमान जी)",
     title: "Pawanputra & Sankat Mochan",
     deed: "Samudra langh kar Lanka mein Mata Sita ki khoj ki, Lanka dahan kiya aur Sanjeevani booti laakar lakshman ji ke pran bachaye.",
-    image: "https://images.unsplash.com/photo-1567157577867-05ccb1388e66?q=80&w=1000&auto=format&fit=crop",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Lord_Hanuman.jpg/440px-Lord_Hanuman.jpg",
     badge: "Supreme Devotee"
   },
   {
     name: "Jatayu (जटायु)",
     title: "Param Pakshiraj & Yoddha",
     deed: "Mata Sita ki raksha ke liye akash mein Ravan se bhayanak yuddh kiya aur dharm ke liye apne praan samarpit kiye.",
-    image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1000&auto=format&fit=crop",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Jatayu_Fights_Ravana.jpg/500px-Jatayu_Fights_Ravana.jpg",
     badge: "Brave Protector"
   },
   {
     name: "Sugriva & Angada (सुग्रीव व अंगद)",
     title: "Kishkindha Leaders",
     deed: "Shri Ram ke sath sachha mitrata ka vachan nibhaya aur mahan Vanara sena ka netritva karke adharm ka nash kiya.",
-    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Sugriva_fighting_Vali.jpg/500px-Sugriva_fighting_Vali.jpg",
     badge: "Vanara Strength"
   },
   {
     name: "Jambavan (जाम्बवान जी)",
     title: "Riksharaj & Wise Elder",
     deed: "Apni agya aur gyan se Hanuman ji ko unki alaukik shaktiyon ka smaran karaya aur yuddh mein param margdarshan diya.",
-    image: "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1000&auto=format&fit=crop",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Jambavan.jpg/400px-Jambavan.jpg",
     badge: "Divine Wisdom"
   },
   {
     name: "Nala & Nila (नल और नीलकंठ)",
     title: "Divine Architects",
     deed: "Vishwakarma ke aashirwad aur gyan se samudra par mahan 'Ram Setu' ka nirmaan kiya jisse sena Lanka pahunchi.",
-    image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rama_Setu_Construction.jpg/500px-Rama_Setu_Construction.jpg",
     badge: "Master Engineers"
   }
 ];
@@ -70,7 +70,6 @@ export default function HisabApp() {
   const [enteredPin, setEnteredPin] = useState('');
   const [pinError, setPinError] = useState(false);
 
-  // Dashboard States
   const [transactions, setTransactions] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [txData, setTxData] = useState({ text: '', amount: '', type: 'income', category: 'General', paymentMode: 'Cash' });
@@ -83,7 +82,6 @@ export default function HisabApp() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Auto slide characters every 5 seconds
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % ramayanaSlides.length);
@@ -132,7 +130,6 @@ export default function HisabApp() {
   const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const netBalance = totalIncome - totalExpense;
 
-  // 1. LOADING ANIMATION
   if (step === 'loading') {
     return (
       <div className="min-h-screen bg-[#120f0c] flex flex-col items-center justify-center font-sans text-amber-100">
@@ -145,7 +142,6 @@ export default function HisabApp() {
     );
   }
 
-  // 2. WELCOME SCREEN
   if (step === 'welcome') {
     return (
       <div className="min-h-screen bg-[#120f0c] flex items-center justify-center p-4">
@@ -173,7 +169,6 @@ export default function HisabApp() {
     );
   }
 
-  // 3. REGISTRATION
   if (step === 'register') {
     return (
       <div className="min-h-screen bg-[#120f0c] flex items-center justify-center p-4">
@@ -233,7 +228,6 @@ export default function HisabApp() {
     );
   }
 
-  // 4. LOGIN PIN SCREEN
   if (step === 'login') {
     return (
       <div className="min-h-screen bg-[#120f0c] flex items-center justify-center p-4">
@@ -272,13 +266,10 @@ export default function HisabApp() {
     );
   }
 
-  // 5. FULL DASHBOARD WITH SIDEBAR & INDIVIDUAL CHARACTER CINEMATIC SLIDESHOW
   const slide = ramayanaSlides[currentSlide];
 
   return (
     <div className="min-h-screen bg-[#fefcf6] text-slate-800 flex font-sans">
-      
-      {/* SIDEBAR NAVIGATION */}
       <aside className="w-64 bg-white border-r border-amber-200 hidden md:flex flex-col justify-between p-6 shadow-sm">
         <div>
           <div className="flex items-center gap-3 mb-8 pb-4 border-b border-amber-100">
@@ -317,10 +308,7 @@ export default function HisabApp() {
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
       <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-        
-        {/* Top Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-amber-200 pb-4 gap-4">
           <div>
             <h2 className="text-2xl font-black text-amber-900">{activeTab}</h2>
@@ -336,7 +324,6 @@ export default function HisabApp() {
           </div>
         </header>
 
-        {/* 🌟 INDIVIDUAL CHARACTER CINEMATIC SLIDESHOW BANNER */}
         <div className="relative w-full rounded-3xl overflow-hidden shadow-xl border border-amber-300 mb-8 bg-slate-900 text-white min-h-[320px] flex items-center">
           <div 
             className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-30 filter blur-[1px]"
@@ -380,7 +367,6 @@ export default function HisabApp() {
           </div>
         </div>
 
-        {/* Conditional Tab Rendering */}
         {activeTab === 'Overview' && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -448,11 +434,9 @@ export default function HisabApp() {
         )}
       </main>
 
-      {/* Transaction Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-amber-200 relative animate-in fade-in zoom-in duration-200">
-            
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-amber-100">
               <h3 className="text-lg font-bold text-amber-900">Naya Karma Lekha Jodein</h3>
               <button 
