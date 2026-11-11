@@ -13,15 +13,14 @@ const ramayanaSlides = [
   { name: "Nala & Nila (नल और नीलकंठ)", title: "Divine Architects", deed: "Vishwakarma ke aashirwad aur gyan se samudra par mahan 'Ram Setu' ka nirmaan kiya jisse sena Lanka pahunchi.", symbol: "🌉", badge: "Master Engineers" }
 ];
 
-const TABS = ['Overview', 'Transactions', 'To collect', 'Reports', 'Business setup'];
-const ICONS = { 'Overview': '📊', 'Transactions': '📜', 'To collect': '📥', 'Reports': '📈', 'Business setup': '⚙️' };
+const TABS = ['Overview', 'Transactions', 'To collect', 'Reports', 'Bank Accounts', 'Business setup'];
+const ICONS = { 'Overview': '📊', 'Transactions': '📜', 'To collect': '📥', 'Reports': '📈', 'Bank Accounts': '🏦', 'Business setup': '⚙️' };
 
-// Shared styles (so we do not repeat long class names everywhere)
 const screenCls = 'min-h-screen bg-[#120f0c] flex items-center justify-center p-4';
 const inputCls = 'w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white';
 const labelCls = 'block text-xs font-bold text-slate-700 uppercase mb-1';
 const primaryBtn = 'w-full py-3.5 bg-amber-800 hover:bg-amber-900 text-white font-bold text-sm rounded-xl shadow-md transition cursor-pointer';
-const emptyTx = { text: '', amount: '', type: 'income', category: 'General', paymentMode: 'Cash' };
+const emptyTx = { text: '', amount: '', type: 'income', category: 'General', paymentMode: 'Cash', bankAccount: 'Cash' };
 
 const AnimStyles = () => (
   <style>{`
@@ -59,40 +58,98 @@ export default function HisabApp() {
   const [biz, setBiz] = useState({ name: '', owner: '', gstin: '', phone: '', address: '' });
   const [bizSaved, setBizSaved] = useState(false);
 
+  // Bank Accounts Management State
+  const [bankAccounts, setBankAccounts] = useState([
+    { id: 1, name: 'Main Cash Drawer', type: 'Cash', accountNo: 'Cash' },
+    { id: 2, name: 'HDFC Bank Primary', type: 'Bank', accountNo: '**** 4321' }
+  ]);
+  const [bankForm, setBankForm] = useState({ name: '', type: 'Bank', accountNo: '' });
+  const [isListening, setIsListening] = useState(false);
+
   const saveDues = (list) => { setDues(list); localStorage.setItem('arthved_dues', JSON.stringify(list)); };
+  
   const addDue = (e) => {
     e.preventDefault();
     if (!dueForm.party || !dueForm.amount) return;
     saveDues([{ id: Date.now(), party: dueForm.party, amount: parseFloat(dueForm.amount), dueDate: dueForm.dueDate }, ...dues]);
     setDueForm({ party: '', amount: '', dueDate: '' });
   };
+
   const receiveDue = (due) => {
-    const newTx = { id: Date.now(), text: `Received from ${due.party}`, amount: due.amount, type: 'income', category: 'Udhaar Wapasi', paymentMode: 'Cash', date: new Date().toLocaleDateString() };
+    const newTx = { id: Date.now(), text: `Received from ${due.party}`, amount: due.amount, type: 'income', category: 'Udhaar Wapasi', paymentMode: 'Cash', bankAccount: 'Cash', date: new Date().toLocaleDateString() };
     const updated = [newTx, ...transactions];
     setTransactions(updated);
     localStorage.setItem('arthved_tx', JSON.stringify(updated));
     saveDues(dues.filter((d) => d.id !== due.id));
   };
+
   const deleteDue = (id) => saveDues(dues.filter((d) => d.id !== id));
+
   const saveBiz = (e) => {
     e.preventDefault();
     localStorage.setItem('arthved_biz', JSON.stringify(biz));
     setBizSaved(true);
     setTimeout(() => setBizSaved(false), 2500);
   };
+
+  const handleAddBank = (e) => {
+    e.preventDefault();
+    if (!bankForm.name) return;
+    const updatedBanks = [...bankAccounts, { id: Date.now(), ...bankForm }];
+    setBankAccounts(updatedBanks);
+    localStorage.setItem('arthved_banks', JSON.stringify(updatedBanks));
+    setBankForm({ name: '', type: 'Bank', accountNo: '' });
+  };
+
+  const deleteBank = (id) => {
+    const updatedBanks = bankAccounts.filter(b => b.id !== id);
+    setBankAccounts(updatedBanks);
+    localStorage.setItem('arthved_banks', JSON.stringify(updatedBanks));
+  };
+
+  // Voice Ledger Feature using Web Speech API
+  const startVoiceRecognition = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice recognition is not supported in this browser. Please use Chrome.");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'hi-IN'; // supports Hindi & Indian English mix
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      // Simple smart parser for voice command e.g., "500 chai ka kharcha" or "paid 1000 rent"
+      const numberMatch = transcript.match(/\d+/);
+      const amount = numberMatch ? numberMatch[0] : '';
+      const text = transcript.replace(/\d+/g, '').trim();
+      const isExpense = transcript.toLowerCase().includes('kharcha') || transcript.toLowerCase().includes('paid') || transcript.toLowerCase().includes('diya');
+      
+      setTxData(prev => ({
+        ...prev,
+        text: text || prev.text,
+        amount: amount || prev.amount,
+        type: isExpense ? 'expense' : 'income'
+      }));
+    };
+    recognition.start();
+  };
+
   const downloadCSV = () => {
-    const rows = [['Date', 'Description', 'Category', 'Payment Mode', 'Type', 'Amount'], ...transactions.map((t) => [t.date, t.text, t.category, t.paymentMode, t.type, t.amount])];
+    const rows = [['Date', 'Description', 'Category', 'Payment Mode', 'Bank Account', 'Type', 'Amount'], ...transactions.map((t) => [t.date, t.text, t.category, t.paymentMode, t.bankAccount || 'Cash', t.type, t.amount])];
     const csv = rows.map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     a.download = 'arthved-report.csv';
     a.click();
   };
+
   const totalDue = dues.reduce((a, d) => a + d.amount, 0);
   const byCategory = Object.entries(transactions.filter((t) => t.type === 'expense').reduce((m, t) => { const k = t.category || 'General'; m[k] = (m[k] || 0) + t.amount; return m; }, {})).sort((a, b) => b[1] - a[1]);
   const byMode = Object.entries(transactions.reduce((m, t) => { const k = t.paymentMode || 'Cash'; m[k] = (m[k] || 0) + t.amount; return m; }, {}));
 
-  // Splash screen: also loads saved transactions
   useEffect(() => {
     const timer = setTimeout(() => {
       try {
@@ -106,6 +163,8 @@ export default function HisabApp() {
         if (savedDues) setDues(JSON.parse(savedDues));
         const savedBiz = localStorage.getItem('arthved_biz');
         if (savedBiz) setBiz(JSON.parse(savedBiz));
+        const savedBanks = localStorage.getItem('arthved_banks');
+        if (savedBanks) setBankAccounts(JSON.parse(savedBanks));
       } catch (err) {
         console.error('Could not read saved data', err);
       }
@@ -139,7 +198,6 @@ export default function HisabApp() {
     }
   };
 
-  // FIXED: locking only goes to the login screen. It no longer deletes the account.
   const handleLock = () => {
     setStep('login');
     setEnteredPin('');
@@ -151,6 +209,7 @@ export default function HisabApp() {
     localStorage.removeItem('arthved_tx');
     localStorage.removeItem('arthved_dues');
     localStorage.removeItem('arthved_biz');
+    localStorage.removeItem('arthved_banks');
     setTransactions([]);
     setDues([]);
     setBiz({ name: '', owner: '', gstin: '', phone: '', address: '' });
@@ -160,16 +219,28 @@ export default function HisabApp() {
   const handleAddTransaction = (e) => {
     e.preventDefault();
     if (!txData.text || !txData.amount) return;
+    const amountVal = parseFloat(txData.amount);
     const newTx = {
       id: Date.now(),
       ...txData,
-      amount: parseFloat(txData.amount),
+      amount: amountVal,
       date: new Date().toLocaleDateString()
     };
     const updated = [newTx, ...transactions];
     setTransactions(updated);
-    // FIXED: save so data stays after refresh
     localStorage.setItem('arthved_tx', JSON.stringify(updated));
+
+    // FEATURE 1: Credit Sales Automation -> Automatically sync to 'To collect' list!
+    if (txData.paymentMode === 'Credit Sales') {
+      const newDue = {
+        id: Date.now() + 1,
+        party: txData.text,
+        amount: amountVal,
+        dueDate: ''
+      };
+      saveDues([newDue, ...dues]);
+    }
+
     setIsModalOpen(false);
     setTxData(emptyTx);
   };
@@ -285,6 +356,7 @@ export default function HisabApp() {
                 <th className="py-3 px-4">Vivaran (Description)</th>
                 <th className="py-3 px-4">Category</th>
                 <th className="py-3 px-4">Payment Mode</th>
+                <th className="py-3 px-4">Account Tag</th>
                 <th className="py-3 px-4">Rashi (Amount)</th>
               </tr>
             </thead>
@@ -295,6 +367,7 @@ export default function HisabApp() {
                   <td className="py-3 px-4 font-semibold text-slate-800">{tx.text}</td>
                   <td className="py-3 px-4 text-slate-600">{tx.category || 'General'}</td>
                   <td className="py-3 px-4"><span className="bg-amber-100 text-amber-900 text-xs px-2 py-1 rounded-md font-bold">{tx.paymentMode || 'Cash'}</span></td>
+                  <td className="py-3 px-4"><span className="bg-slate-100 text-slate-800 text-xs px-2 py-1 rounded-md font-medium">🏦 {tx.bankAccount || 'Cash'}</span></td>
                   <td className={`py-3 px-4 font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {tx.type === 'income' ? '+' : '-'} ₹ {Math.abs(tx.amount).toLocaleString()}
                   </td>
@@ -348,12 +421,10 @@ export default function HisabApp() {
             <button onClick={() => setIsModalOpen(true)} className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-4 py-2.5 rounded-xl font-bold text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
               <span>➕</span> Add Sale / Expense
             </button>
-            {/* NEW: lock button for phones */}
             <button onClick={handleLock} className="md:hidden bg-slate-100 text-slate-700 px-3 py-2.5 rounded-xl font-bold text-sm cursor-pointer">🔒</button>
           </div>
         </header>
 
-        {/* NEW: tab menu for phones */}
         <div className="md:hidden flex gap-2 overflow-x-auto pb-3 mb-4">
           {TABS.map((tab) => (
             <button
@@ -366,7 +437,6 @@ export default function HisabApp() {
           ))}
         </div>
 
-        {/* Ramayana banner now shows only on Overview */}
         {activeTab === 'Overview' && (
           <div className="relative w-full rounded-3xl overflow-hidden shadow-xl border border-amber-300 mb-8 bg-slate-900 text-white min-h-[320px] flex items-center">
             <div key={"bg"+currentSlide} className="av-pop absolute inset-y-0 right-0 pr-8 flex items-center text-[13rem] opacity-10 select-none pointer-events-none">{slide.symbol}</div>
@@ -453,6 +523,36 @@ export default function HisabApp() {
           </div>
         )}
 
+        {/* BANK ACCOUNTS PROVISION */}
+        {activeTab === 'Bank Accounts' && (
+          <div className="space-y-6 mb-12 max-w-3xl">
+            <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
+              <h2 className="text-xl font-bold text-amber-900 mb-1">🏦 Bank & Online Accounts Provision</h2>
+              <p className="text-xs text-slate-500 mb-4">Add your bank accounts or wallets here to securely tag your online transactions manually or via voice.</p>
+              
+              <form onSubmit={handleAddBank} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-6">
+                <div><label className={labelCls}>Account Name</label><input type="text" required placeholder="Jaise: SBI Current, Paytm" value={bankForm.name} onChange={(e) => setBankForm({ ...bankForm, name: e.target.value })} className={inputCls} /></div>
+                <div><label className={labelCls}>Account No / UPI ID</label><input type="text" placeholder="**** 1234 / UPI" value={bankForm.accountNo} onChange={(e) => setBankForm({ ...bankForm, accountNo: e.target.value })} className={inputCls} /></div>
+                <button type="submit" className={primaryBtn}>➕ Add Account</button>
+              </form>
+
+              <div className="divide-y divide-amber-50">
+                {bankAccounts.map((acc) => (
+                  <div key={acc.id} className="py-3 flex justify-between items-center">
+                    <div>
+                      <p className="font-bold text-slate-800">{acc.name}</p>
+                      <p className="text-xs text-slate-500">{acc.accountNo || 'Secure Vault Tag'}</p>
+                    </div>
+                    {bankAccounts.length > 1 && (
+                      <button onClick={() => deleteBank(acc.id)} className="text-rose-500 text-xs font-bold hover:underline cursor-pointer">Remove</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'Reports' && (
           <div className="space-y-6 mb-12">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -510,6 +610,7 @@ export default function HisabApp() {
         )}
       </main>
 
+      {/* TRANSACTION MODAL WITH VOICE LEDGER FEATURE */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-amber-200">
@@ -517,6 +618,22 @@ export default function HisabApp() {
               <h3 className="text-lg font-bold text-amber-900">Naya Karma Lekha Jodein</h3>
               <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-rose-600 text-xl font-bold p-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer">✕</button>
             </div>
+
+            {/* VOICE LEDGER BUTTON */}
+            <div className="mb-4 bg-amber-50 border border-amber-200 p-3 rounded-2xl flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-amber-900">Voice Ledger (AI Mic)</p>
+                <p className="text-[10px] text-slate-500">Bolkar entry bharein (Jaise: "500 chai ka kharcha")</p>
+              </div>
+              <button 
+                type="button" 
+                onClick={startVoiceRecognition}
+                className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow transition ${isListening ? 'bg-rose-600 text-white animate-pulse' : 'bg-amber-800 text-white hover:bg-amber-900'}`}
+              >
+                <span>🎙️</span> {isListening ? 'Sun rahe hain...' : 'Bolie'}
+              </button>
+            </div>
+
             <form onSubmit={handleAddTransaction} className="space-y-4">
               <div>
                 <label className={labelCls}>Vivaran (Description)</label>
@@ -544,9 +661,19 @@ export default function HisabApp() {
                   </select>
                 </div>
               </div>
-              <div>
-                <label className={labelCls}>Category</label>
-                <input type="text" placeholder="Jaise: Samagri, Bhent, Nivesh..." value={txData.category} onChange={(e) => setTxData({ ...txData, category: e.target.value })} className={inputCls} />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Bank / Account Tag</label>
+                  <select value={txData.bankAccount} onChange={(e) => setTxData({ ...txData, bankAccount: e.target.value })} className={inputCls}>
+                    {bankAccounts.map(b => (
+                      <option key={b.id} value={b.name}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>Category</label>
+                  <input type="text" placeholder="Jaise: Samagri, Bhent..." value={txData.category} onChange={(e) => setTxData({ ...txData, category: e.target.value })} className={inputCls} />
+                </div>
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-amber-100">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">Cancel</button>
