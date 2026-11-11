@@ -1,399 +1,342 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect, useTransition } from 'react';
-import { getTransactions, addTransaction, deleteTransaction } from '@/app/actions';
+import React, { useState, useEffect } from 'react'
+import { addTransaction, deleteTransactions, getTransactions } from '../app/actions'
 
-const ArthvedLogo = () => (
-  <div className="w-11 h-11 flex items-center justify-center relative flex-shrink-0" title="Arthved: Financial Science & Vision">
-    <div className="absolute inset-0 bg-gradient-to-tr from-amber-600 to-amber-400 rounded-2xl shadow-md"></div>
-    <svg viewBox="0 0 100 100" className="w-7 h-7 relative z-10 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="50" cy="50" r="32" className="opacity-40" />
-      <line x1="50" y1="8" x2="50" y2="18" />
-      <line x1="50" y1="82" x2="50" y2="92" />
-      <line x1="8" y1="50" x2="18" y2="50" />
-      <line x1="82" y1="50" x2="92" y2="50" />
-      <ellipse cx="50" cy="50" rx="16" ry="10" strokeWidth="2.5" />
-      <circle cx="50" cy="50" r="5" fill="currentColor" stroke="none" />
-    </svg>
-  </div>
-);
+const ramayanaCharacters = [
+  {
+    name: "Shri Ram (श्री राम)",
+    title: "Maryada Purushottam",
+    deed: "Pita ke vachan hetu 14 varsh ka vanvas sweekar kiya aur asatya par satya ki vijay sthapit ki.",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Lord_Rama_drawing.jpg/440px-Lord_Rama_drawing.jpg",
+    badge: "The Supreme Ideal"
+  },
+  {
+    name: "Mata Sita (माता सीता)",
+    title: "Pavitrata & Tyag ki Moorti",
+    deed: "Rajya ke sabhi sukhon ka tyag karke vanvas mein sahayatri bani aur atulya dhairya ka parichay diya.",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Sita_Ram_Lakshman_Hanuman.jpg/500px-Sita_Ram_Lakshman_Hanuman.jpg",
+    badge: "Devotion & Grace"
+  },
+  {
+    name: "Lakshman ji (लक्ष्मण जी)",
+    title: "Bhratruprem & Nishtha",
+    deed: "Bina ek pal soche bade bhai Shri Ram aur bhabhi ke sath vanvas gaye aur din-raat adig pehra diya.",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Lakshmana_in_Ramayana.jpg/400px-Lakshmana_in_Ramayana.jpg",
+    badge: "Eternal Loyalty"
+  },
+  {
+    name: "Jatayu (जटायु)",
+    title: "Param Pakshiraj & Yoddha",
+    deed: "Mata Sita ki raksha ke liye akash mein Ravan se bhayanak yuddh kiya aur apna jeevan samarpit kiya.",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Jatayu_Fights_Ravana.jpg/500px-Jatayu_Fights_Ravana.jpg",
+    badge: "The Brave Protector"
+  },
+  {
+    name: "Hanuman ji (हनुमान जी)",
+    title: "Pawanputra & Sankat Mochan",
+    deed: "Samudra langh kar Lanka mein Mata Sita ki khoj ki, Lanka dahan kiya aur Sanjeevani se pran bachaye.",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Lord_Hanuman.jpg/440px-Lord_Hanuman.jpg",
+    badge: "Supreme Devotee"
+  },
+  {
+    name: "Sugriva & Angada (सुग्रीव व अंगद)",
+    title: "Kishkindha Allies & Leaders",
+    deed: "Shri Ram ke sath sachha mitrata ka vachan nibhaya aur mahan Vanara sena ka netritva kiya.",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Sugriva_fighting_Vali.jpg/500px-Sugriva_fighting_Vali.jpg",
+    badge: "The Vanara Strength"
+  },
+  {
+    name: "Jambavan (जाम्बवान जी)",
+    title: "Riksharaj & Wise Elder",
+    deed: "Apni agya aur gyan se Hanuman ji ko unki alaukik shaktiyon ka smaran karaya.",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Jambavan.jpg/400px-Jambavan.jpg",
+    badge: "Divine Wisdom"
+  },
+  {
+    name: "Nala & Nila (नल और नीलकंठ)",
+    title: "Divine Architects",
+    deed: "Vishwakarma ke aashirwad aur gyan se samudra par mahan 'Ram Setu' ka nirmaan kiya.",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rama_Setu_Construction.jpg/500px-Rama_Setu_Construction.jpg",
+    badge: "Master Engineers"
+  }
+];
 
-export default function DashboardUI({ onLock, onLogout, user }) {
-  const [activeTab, setActiveTab] = useState('Overview');
+export default function DashboardUI() {
   const [transactions, setTransactions] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterCategory, setFilterCategory] = useState('All');
-  const [filterType, setFilterType] = useState('All');
-  const [isPending, startTransition] = useTransition();
-  
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState('sale');
-  const [text, setText] = useState('');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('General');
-  const [paymentMode, setPaymentMode] = useState('Cash');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Neon DB se transactions load karne ke liye
+  // Form states including payment options (Cash, UPI, Online, Credit Sales)
+  const [formData, setFormData] = useState({
+    text: '',
+    amount: '',
+    type: 'income', // income or expense
+    category: 'General',
+    paymentMode: 'Cash' // Cash, UPI, Online, Credit
+  });
+
   useEffect(() => {
     async function loadData() {
       const res = await getTransactions();
       if (res.success) {
-        const formatted = res.data.map(t => ({
-          ...t,
-          date: new Date(t.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-        }));
-        setTransactions(formatted);
+        setTransactions(res.data);
       }
     }
     loadData();
   }, []);
 
-  const handleAddTransaction = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!text || !amount) return;
+    if (!formData.text || !formData.amount) return;
 
-    startTransition(async () => {
-      const res = await addTransaction({
-        text,
-        amount: parseFloat(amount),
-        type: modalType,
-        category: modalType === 'sale' ? category : 'Utilities',
-        paymentMode,
-        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-      });
-
-      if (res.success) {
-        const updatedRes = await getTransactions();
-        if (updatedRes.success) {
-          const formatted = updatedRes.data.map(t => ({
-            ...t,
-            date: new Date(t.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-          }));
-          setTransactions(formatted);
-        }
-        setText('');
-        setAmount('');
-        setPaymentMode('Cash');
-        setCategory('General');
-        setShowModal(false);
-      } else {
-        alert('Transaction save nahi ho payi!');
-      }
+    setLoading(true);
+    const res = await addTransaction({
+      text: formData.text,
+      amount: parseFloat(formData.amount),
+      type: formData.type,
+      category: formData.category,
+      paymentMode: formData.paymentMode,
+      date: new Date().toISOString()
     });
+
+    if (res.success) {
+      setTransactions([res.data, ...transactions]);
+      setIsModalOpen(false);
+      setFormData({ text: '', amount: '', type: 'income', category: 'General', paymentMode: 'Cash' });
+    }
+    setLoading(false);
   };
 
-  const handleMarkCollected = async (id) => {
-    startTransition(async () => {
-      const updated = transactions.map(item => item.id === id ? {...item, paymentMode: 'Online'} : item);
-      setTransactions(updated);
-    });
-  };
+  // Calculations
+  const totalIncome = transactions
+    .filter(t => t.type === 'income')
+    .reduce((acc, curr) => acc + curr.amount, 0);
 
-  const salesToday = transactions.filter(t => t.type === 'sale').reduce((acc, t) => acc + t.amount, 0);
-  const expensesToday = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
-  const netBalance = salesToday - expensesToday;
+  const totalExpense = transactions
+    .filter(t => t.type === 'expense')
+    .reduce((acc, curr) => acc + curr.amount, 0);
 
-  const filteredTransactions = transactions.filter(t => {
-    const matchesSearch = t.text.toLowerCase().includes(searchTerm.toLowerCase()) || t.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === 'All' || t.category === filterCategory;
-    const matchesType = filterType === 'All' || t.type === filterType;
-    return matchesSearch && matchesCategory && matchesType;
-  });
+  const netBalance = totalIncome - totalExpense;
 
   return (
-    <div className="min-h-screen bg-[#fefcf6] text-slate-800 flex font-sans">
-      <aside className="w-64 bg-white border-r border-amber-100 flex flex-col justify-between hidden md:flex shadow-sm">
+    <div className="min-h-screen bg-[#fefcf6] text-slate-800 p-4 md:p-8 font-sans">
+      {/* Header */}
+      <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center mb-8 border-b border-amber-200 pb-4">
         <div>
-          <div className="p-6 border-b border-amber-100 bg-gradient-to-br from-amber-50/40 to-white flex items-center space-x-3">
-            <ArthvedLogo />
-            <div>
-              <h1 className="font-black text-slate-900 text-lg leading-tight">HisabCloud</h1>
-              <p className="text-[10px] text-amber-900 font-bold tracking-wider mt-0.5">CLOUD LEDGER</p>
-            </div>
-          </div>
-          <nav className="p-4 space-y-1">
-            {['Overview', 'Transactions', 'To collect', 'Reports', 'Business setup'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-between ${
-                  activeTab === tab ? 'bg-amber-100/70 text-amber-900 border border-amber-200/50 shadow-xs' : 'text-slate-600 hover:bg-amber-50/50'
-                }`}
-              >
-                <span>{tab}</span>
-                {tab === 'To collect' && (
-                  <span className="bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-full text-[9px] font-black">
-                    {transactions.filter(t => t.paymentMode === 'Credit').length}
-                  </span>
-                )}
-              </button>
-            ))}
-          </nav>
+          <h1 className="text-3xl font-extrabold text-amber-900 tracking-tight flex items-center gap-2">
+            <span>🪷</span> ArthVed Ledger <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full border border-amber-300">Ayodhya Edition</span>
+          </h1>
+          <p className="text-xs text-slate-600 mt-1">Dharmik Niti aur Vanara Sena ke prabandh par aadharit financial vault.</p>
         </div>
-        <div className="p-4 border-t border-amber-100 bg-amber-50/30 space-y-2">
-          <div className="p-3 bg-white rounded-2xl border border-amber-200/60 shadow-xs">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Vault</p>
-            <p className="text-xs font-black text-slate-900 truncate mt-0.5">{user?.businessName || 'My Enterprise'}</p>
-          </div>
-          <button onClick={onLock} className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-sm">
-            Lock Vault 🔒
-          </button>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="mt-4 md:mt-0 bg-amber-800 hover:bg-amber-900 text-amber-50 px-5 py-2.5 rounded-xl font-bold shadow-md transition-all flex items-center gap-2"
+        >
+          <span>➕</span> Naya Lekha Jodein (Add Transaction)
+        </button>
+      </header>
+
+      {/* Main Stats Cards */}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Net Balance (Kosh)</p>
+          <h3 className={`text-2xl font-black mt-2 ${netBalance >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+            ₹ {netBalance.toLocaleString()}
+          </h3>
         </div>
-      </aside>
-
-      <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">{activeTab}</h2>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">Neon Cloud Database Sync Active ⚡</p>
-          </div>
+        <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Aagman (Total Income)</p>
+          <h3 className="text-2xl font-black mt-2 text-emerald-600">₹ {totalIncome.toLocaleString()}</h3>
         </div>
+        <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Vyaya (Total Expense)</p>
+          <h3 className="text-2xl font-black mt-2 text-rose-600">₹ {totalExpense.toLocaleString()}</h3>
+        </div>
+      </div>
 
-        {activeTab === 'Overview' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white p-5 rounded-3xl border border-amber-100 shadow-sm flex flex-col justify-between">
-                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Sales</span>
-                <h3 className="text-2xl font-black text-emerald-700 mt-2">₹{salesToday.toLocaleString('en-IN')}</h3>
-                <span className="text-[10px] text-emerald-600 font-bold mt-1">Neon Cloud Inflow</span>
-              </div>
-              <div className="bg-white p-5 rounded-3xl border border-amber-100 shadow-sm flex flex-col justify-between">
-                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Expenses</span>
-                <h3 className="text-2xl font-black text-rose-600 mt-2">₹{expensesToday.toLocaleString('en-IN')}</h3>
-                <span className="text-[10px] text-rose-500 font-bold mt-1">Cloud Outflows</span>
-              </div>
-              <div className="bg-white p-5 rounded-3xl border border-amber-100 shadow-sm flex flex-col justify-between">
-                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Net Position</span>
-                <h3 className={`text-2xl font-black mt-2 ${netBalance >= 0 ? 'text-slate-900' : 'text-rose-600'}`}>
-                  ₹{netBalance.toLocaleString('en-IN')}
-                </h3>
-                <span className="text-[10px] text-amber-900 font-bold mt-1">Live Database Surplus</span>
-              </div>
-            </div>
-
-            {/* Clean Quick Entry Section */}
-            <div className="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm space-y-4">
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Quick Entry</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button 
-                  onClick={() => { setModalType('sale'); setShowModal(true); }}
-                  className="p-4 bg-amber-50/50 hover:bg-amber-100/60 border border-amber-200/60 rounded-2xl flex items-center justify-between transition cursor-pointer group"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-lg">+</div>
-                    <div className="text-left">
-                      <p className="text-xs font-black text-slate-900">Record a Sale</p>
-                      <p className="text-[10px] text-slate-500">Product, service or cash inflow</p>
-                    </div>
-                  </div>
-                  <span className="text-amber-800 font-bold text-sm group-hover:translate-x-1 transition">→</span>
-                </button>
-
-                <button 
-                  onClick={() => { setModalType('expense'); setShowModal(true); }}
-                  className="p-4 bg-amber-50/50 hover:bg-amber-100/60 border border-amber-200/60 rounded-2xl flex items-center justify-between transition cursor-pointer group"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-black text-lg">-</div>
-                    <div className="text-left">
-                      <p className="text-xs font-black text-slate-900">Record an Expense</p>
-                      <p className="text-[10px] text-slate-500">Stock, rent, supplies, bills</p>
-                    </div>
-                  </div>
-                  <span className="text-amber-800 font-bold text-sm group-hover:translate-x-1 transition">→</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Recent Financial Entries</h3>
-                <button onClick={() => setActiveTab('Transactions')} className="text-xs font-black text-amber-800 hover:underline cursor-pointer">
-                  View All →
-                </button>
-              </div>
-              {transactions.length === 0 ? (
-                <p className="text-xs text-slate-400 py-6 text-center">No transactions recorded in cloud yet.</p>
-              ) : (
-                <div className="space-y-2.5">
-                  {transactions.slice(0, 5).map(t => (
-                    <div key={t.id} className="flex justify-between items-center p-3.5 bg-amber-50/30 hover:bg-amber-50/60 transition rounded-2xl border border-amber-100 text-xs">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs ${t.type === 'expense' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                          {t.type === 'expense' ? '↓' : '↑'}
-                        </div>
-                        <div>
-                          <p className="font-extrabold text-slate-900">{t.text}</p>
-                          <p className="text-[10px] text-amber-900/80 mt-0.5">{t.category} • {t.paymentMode} • {t.date}</p>
-                        </div>
-                      </div>
-                      <span className={`font-black text-sm ${t.type === 'expense' ? 'text-rose-600' : 'text-emerald-700'}`}>
-                        {t.type === 'expense' ? '-' : '+'}₹{t.amount.toLocaleString('en-IN')}
+      {/* Transactions List */}
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl border border-amber-200 shadow-sm p-6 mb-12">
+        <h2 className="text-xl font-bold text-amber-900 mb-4 flex items-center gap-2">
+          <span>📜</span> Karma Lekha (Recent Transactions)
+        </h2>
+        {transactions.length === 0 ? (
+          <p className="text-sm text-slate-500 py-6 text-center">Abhi tak koi bhi len-den darj nahi kiya gaya hai.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-amber-100 text-xs text-amber-900 uppercase">
+                  <th className="py-3 px-4">Vivaran (Description)</th>
+                  <th className="py-3 px-4">Category</th>
+                  <th className="py-3 px-4">Payment Mode</th>
+                  <th className="py-3 px-4">Rashi (Amount)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-amber-50 text-sm">
+                {transactions.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-amber-50/50">
+                    <td className="py-3 px-4 font-semibold text-slate-800">{tx.text}</td>
+                    <td className="py-3 px-4 text-slate-600">{tx.category || 'General'}</td>
+                    <td className="py-3 px-4">
+                      <span className="bg-amber-100 text-amber-900 text-xs px-2 py-1 rounded-md font-bold">
+                        {tx.paymentMode || 'Cash'}
                       </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    </td>
+                    <td className={`py-3 px-4 font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      {tx.type === 'income' ? '+' : '-'} ₹ {Math.abs(tx.amount).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
+      </div>
 
-        {activeTab === 'Transactions' && (
-          <div className="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pb-2 border-b border-amber-100">
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Complete Cloud Ledger</h3>
-              <div className="flex items-center space-x-2 w-full sm:w-auto">
+      {/* Valmiki Ramayana & Kishkindha Chronicle Section */}
+      <div className="max-w-6xl mx-auto bg-[#fefcf6] border-2 border-amber-300 rounded-2xl p-6 md:p-8 my-8 shadow-xl text-slate-900">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <span className="text-3xl">🏹🪷</span>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-amber-900 mt-2 tracking-wide">
+            Valmiki Ramayana & Kishkindha Chronicle
+          </h2>
+          <p className="text-sm text-slate-700 mt-2 font-medium">
+            The immortal legacy of Shri Ram, Mata Sita, Lakshman ji, Jatayu, and the mighty Vanara Army who established eternal righteousness.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {ramayanaCharacters.map((char, index) => (
+            <div 
+              key={index} 
+              className="bg-white rounded-xl overflow-hidden border border-amber-200 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
+            >
+              <div className="relative h-48 w-full overflow-hidden bg-amber-50">
+                <img 
+                  src={char.image} 
+                  alt={char.name} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+                <div className="absolute top-2 right-2 bg-amber-900/80 backdrop-blur-sm text-amber-100 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
+                  {char.badge}
+                </div>
+              </div>
+
+              <div className="p-4 flex flex-col flex-grow justify-between">
+                <div>
+                  <h3 className="font-bold text-amber-900 text-base leading-snug">{char.name}</h3>
+                  <p className="text-xs font-semibold text-amber-600 mt-0.5">{char.title}</p>
+                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">{char.deed}</p>
+                </div>
+                
+                <div className="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between text-[11px] font-bold text-amber-800">
+                  <span>Valmiki Ramayana</span>
+                  <span>✦ 🪔 ✦</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Transaction Modal with Cancel (Close) Button & Payment Mode Options */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-amber-200 relative animate-in fade-in zoom-in duration-200">
+            
+            {/* Header with Close / Cancel Cross Button */}
+            <div className="flex justify-between items-center mb-4 pb-2 border-b border-amber-100">
+              <h3 className="text-lg font-bold text-amber-900">Naya Karma Lekha Jodein</h3>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-rose-600 text-xl font-bold p-1 rounded-lg hover:bg-rose-50 transition-colors"
+                title="Cancel"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Vivaran (Description)</label>
                 <input 
                   type="text" 
-                  placeholder="Search records..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="px-3.5 py-2 border border-amber-200 rounded-xl text-xs bg-amber-50/20 w-full sm:w-60 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                  required
+                  placeholder="Jaise: Yajna Samagri, Seva daan..."
+                  value={formData.text}
+                  onChange={(e) => setFormData({ ...formData, text: e.target.value })}
+                  className="w-full border border-amber-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
-            </div>
 
-            {filteredTransactions.length === 0 ? (
-              <p className="text-xs text-slate-400 py-10 text-center">No matching records found.</p>
-            ) : (
-              <div className="space-y-2.5">
-                {filteredTransactions.map(t => (
-                  <div key={t.id} className="flex justify-between items-center p-4 bg-amber-50/30 rounded-2xl border border-amber-100 text-xs">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs ${t.type === 'expense' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                        {t.type === 'expense' ? '↓' : '↑'}
-                      </div>
-                      <div>
-                        <p className="font-extrabold text-slate-900 text-sm">{t.text}</p>
-                        <p className="text-[11px] text-amber-900/80 mt-0.5">
-                          <span className="bg-amber-200/60 px-1.5 py-0.5 rounded font-bold mr-1">{t.category}</span>
-                          {t.paymentMode} • {t.date}
-                        </p>
-                      </div>
-                    </div>
-                    <span className={`font-black text-base ${t.type === 'expense' ? 'text-rose-600' : 'text-emerald-700'}`}>
-                      {t.type === 'expense' ? '-' : '+'}₹{t.amount.toLocaleString('en-IN')}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'To collect' && (
-          <div className="bg-white p-8 rounded-3xl border border-amber-100/80 shadow-sm space-y-4">
-            <div className="pb-3 border-b border-amber-100">
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Customer Dues & Udhari Ledger</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Manage outstanding market credit and receivables.</p>
-            </div>
-            {transactions.filter(t => t.paymentMode === 'Credit').length === 0 ? (
-              <div className="py-12 text-center space-y-2">
-                <p className="text-sm font-black text-slate-700">All clear!</p>
-                <p className="text-xs text-slate-400">No pending credit or udhari entries in your cloud ledger.</p>
-              </div>
-            ) : (
-              transactions.filter(t => t.paymentMode === 'Credit').map(t => (
-                <div key={t.id} className="flex justify-between items-center p-4 bg-amber-50/40 rounded-2xl border border-amber-200 text-xs">
-                  <div>
-                    <p className="font-black text-slate-900 text-sm">{t.text}</p>
-                    <p className="text-[11px] text-amber-800 mt-0.5">Recorded on: {t.date} • Category: {t.category}</p>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <span className="font-black text-rose-600 text-sm">₹{t.amount.toLocaleString('en-IN')}</span>
-                    <button 
-                      onClick={() => handleMarkCollected(t.id)}
-                      className="px-3.5 py-2 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-xs"
-                    >
-                      Mark Collected ✓
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {activeTab === 'Reports' && (
-          <div className="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm space-y-4">
-            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Reports & Cloud Analytics</h3>
-            <p className="text-xs text-slate-500">Total recorded transaction items in Neon DB: <span className="font-bold text-slate-900">{transactions.length}</span></p>
-            <div className="p-4 bg-amber-50/40 rounded-2xl border border-amber-100 space-y-2">
-              <p className="text-xs font-bold text-amber-900">Database Status: Neon PostgreSQL Connected ⚡</p>
-              <p className="text-[11px] text-slate-600">All financial data is safely synced to the cloud server.</p>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'Business setup' && (
-          <div className="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm space-y-4">
-            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Business Setup & Vault Options</h3>
-            <p className="text-xs text-slate-500">Manage enterprise configuration, profile settings, and cloud sync parameters.</p>
-            <div className="pt-2">
-              <button onClick={onLogout || onLock} className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-sm">
-                Sign Out / Lock Vault
-              </button>
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* RECORD SALE / EXPENSE MODAL WITH CANCEL BUTTON */}
-      {showModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full border border-amber-100 space-y-4 relative">
-            <div className="flex justify-between items-center border-b border-amber-100 pb-3">
-              <h3 className="text-sm font-black uppercase text-slate-900 tracking-wider">Record {modalType}</h3>
-              <button 
-                onClick={() => setShowModal(false)} 
-                className="text-slate-400 hover:text-slate-700 font-bold text-xl cursor-pointer p-1 rounded-lg hover:bg-amber-50"
-              >
-                &times;
-              </button>
-            </div>
-            <form onSubmit={handleAddTransaction} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1">Description / Party Name</label>
-                <input type="text" required value={text} onChange={(e) => setText(e.target.value)} className="w-full px-4 py-2.5 border border-amber-200 rounded-xl text-xs bg-amber-50/20 focus:outline-none focus:ring-2 focus:ring-amber-500/20" placeholder="e.g. Sharma Ji" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Rashi (Amount in ₹)</label>
+                <input 
+                  type="number" 
+                  required
+                  placeholder="0.00"
+                  value={formData.amount}
+                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                  className="w-full border border-amber-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1">Amount (₹)</label>
-                <input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full px-4 py-2.5 border border-amber-200 rounded-xl text-xs bg-amber-50/20 focus:outline-none focus:ring-2 focus:ring-amber-500/20" placeholder="0.00" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1">Payment Mode</label>
-                <select value={paymentMode} onChange={(e) => setPaymentMode(e.target.value)} className="w-full px-4 py-2.5 border border-amber-200 rounded-xl text-xs bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500/20">
-                  <option value="Cash">Cash</option>
-                  <option value="Online">Online / UPI</option>
-                  <option value="Credit">Credit / Udhari</option>
-                </select>
-              </div>
-              {modalType === 'sale' && (
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1">Category</label>
-                  <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-2.5 border border-amber-200 rounded-xl text-xs bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500/20">
-                    <option value="General">General</option>
-                    <option value="Sales">Sales</option>
-                    <option value="Inventory">Inventory</option>
-                    <option value="Services">Services</option>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Prakar (Type)</label>
+                  <select 
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full border border-amber-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                  >
+                    <option value="income">Aagman (Income)</option>
+                    <option value="expense">Vyaya (Expense)</option>
                   </select>
                 </div>
-              )}
-              
-              <div className="flex space-x-2 pt-2">
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Payment Mode</label>
+                  <select 
+                    value={formData.paymentMode}
+                    onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
+                    className="w-full border border-amber-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                  >
+                    <option value="Cash">Cash</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Online">Online</option>
+                    <option value="Credit Sales">Credit Sales</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Category</label>
+                <input 
+                  type="text" 
+                  placeholder="Jaise: Samagri, Bhent, Nivesh..."
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className="w-full border border-amber-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+
+              {/* Action Buttons inside Modal */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-amber-100">
                 <button 
-                  type="button" 
-                  onClick={() => setShowModal(false)}
-                  className="w-1/2 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black rounded-xl transition cursor-pointer shadow-xs"
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
-                  type="submit" 
-                  disabled={isPending} 
-                  className="w-1/2 py-3 bg-amber-800 hover:bg-amber-900 text-white text-xs font-black rounded-xl transition cursor-pointer shadow-md disabled:opacity-50"
+                  type="submit"
+                  disabled={loading}
+                  className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-5 py-2 rounded-xl text-sm font-bold shadow-md transition-all"
                 >
-                  {isPending ? 'Saving...' : 'Save Record 🪔'}
+                  {loading ? 'Surakshit ho raha hai...' : 'Surakshit Karein'}
                 </button>
               </div>
             </form>
@@ -401,5 +344,5 @@ export default function DashboardUI({ onLock, onLogout, user }) {
         </div>
       )}
     </div>
-  );
+  )
 }
