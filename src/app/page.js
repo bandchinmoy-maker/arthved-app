@@ -487,7 +487,7 @@ export default function HisabApp() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Payment Mode</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mw-1">Payment Mode</label>
                   <select 
                     value={txData.paymentMode}
                     onChange={(e) => setTxData({ ...txData, paymentMode: e.target.value })}
@@ -501,7 +501,7 @@ export default function HisabApp() {
                 </div>
               </div>
 
-              <div>
+<div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Category</label>
                 <input 
                   type="text" 
