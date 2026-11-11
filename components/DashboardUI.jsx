@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { addTransaction, deleteTransactions, getTransactions } from '../app/actions'
+import { addTransaction, getTransactions } from '../app/actions'
 
 const ramayanaCharacters = [
   {
@@ -67,13 +67,12 @@ export default function DashboardUI() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Form states including payment options (Cash, UPI, Online, Credit Sales)
   const [formData, setFormData] = useState({
     text: '',
     amount: '',
-    type: 'income', // income or expense
+    type: 'income',
     category: 'General',
-    paymentMode: 'Cash' // Cash, UPI, Online, Credit
+    paymentMode: 'Cash'
   });
 
   useEffect(() => {
@@ -108,7 +107,6 @@ export default function DashboardUI() {
     setLoading(false);
   };
 
-  // Calculations
   const totalIncome = transactions
     .filter(t => t.type === 'income')
     .reduce((acc, curr) => acc + curr.amount, 0);
@@ -241,12 +239,11 @@ export default function DashboardUI() {
         </div>
       </div>
 
-      {/* Transaction Modal with Cancel (Close) Button & Payment Mode Options */}
+      {/* Transaction Modal with Cancel (Close) Button & Payment Options */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-amber-200 relative animate-in fade-in zoom-in duration-200">
             
-            {/* Header with Close / Cancel Cross Button */}
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-amber-100">
               <h3 className="text-lg font-bold text-amber-900">Naya Karma Lekha Jodein</h3>
               <button 
@@ -322,7 +319,6 @@ export default function DashboardUI() {
                 />
               </div>
 
-              {/* Action Buttons inside Modal */}
               <div className="flex justify-end gap-3 pt-4 border-t border-amber-100">
                 <button 
                   type="button"
