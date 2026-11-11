@@ -58,7 +58,6 @@ export default function HisabApp() {
   const [biz, setBiz] = useState({ name: '', owner: '', gstin: '', phone: '', address: '' });
   const [bizSaved, setBizSaved] = useState(false);
 
-  // Bank Accounts (Starts with only Cash Drawer, no dummy banks)
   const [bankAccounts, setBankAccounts] = useState([
     { id: 1, name: 'Main Cash Drawer', type: 'Cash', accountNo: 'Cash' }
   ]);
@@ -107,7 +106,6 @@ export default function HisabApp() {
     localStorage.setItem('arthved_banks', JSON.stringify(updatedBanks));
   };
 
-  // Voice Ledger Feature
   const startVoiceRecognition = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -136,7 +134,6 @@ export default function HisabApp() {
     recognition.start();
   };
 
-  // Smart Clipboard SMS Sniffer Feature
   const checkClipboardForSMS = async () => {
     try {
       if (!navigator.clipboard || !navigator.clipboard.readText) {
@@ -259,7 +256,6 @@ export default function HisabApp() {
     setTransactions(updated);
     localStorage.setItem('arthved_tx', JSON.stringify(updated));
 
-    // Credit Sales Automation
     if (txData.paymentMode === 'Credit Sales') {
       const newDue = {
         id: Date.now() + 1,
@@ -286,7 +282,15 @@ export default function HisabApp() {
         <div className="relative mb-8">
           <div className="av-ring absolute -inset-6 rounded-full border-2 border-dashed border-amber-500/40"></div>
           <div className="av-glow w-28 h-28 bg-gradient-to-tr from-amber-600 to-amber-400 rounded-full flex items-center justify-center text-5xl border border-amber-300/40">
-            <span className="av-flame">🪔</span>
+            {/* Surya & Nayan Logo in Loading Screen */}
+            <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="48" fill="#120f0c" stroke="#f59e0b" strokeWidth="4"/>
+              <path d="M50 8V18M50 82V92M8 50H18M82 50H92M20 20L27 27M73 73L80 80M20 80L27 73M73 27L80 20" stroke="#fbbf24" strokeWidth="4" strokeLinecap="round"/>
+              <circle cx="50" cy="50" r="24" fill="#f59e0b"/>
+              <path d="M26 50C34 38 42 34 50 34C58 34 66 38 74 50C66 62 58 66 50 66C42 66 34 62 26 50Z" fill="#120f0c" stroke="#fbbf24" strokeWidth="3"/>
+              <circle cx="50" cy="50" r="9" fill="#fbbf24"/>
+              <circle cx="52" cy="48" r="3" fill="#120f0c"/>
+            </svg>
           </div>
         </div>
         <h1 className="text-4xl md:text-5xl font-black flex gap-1 md:gap-2">
@@ -303,7 +307,15 @@ export default function HisabApp() {
     return (
       <div className={screenCls}>
         <div className="bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl max-w-md w-full border border-amber-300/40 text-center">
-          <div className="w-16 h-16 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">👁️</div>
+          <div className="w-16 h-16 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
+            <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="48" fill="#120f0c" stroke="#f59e0b" strokeWidth="4"/>
+              <path d="M50 10V20M50 80V90M10 50H20M80 50H90" stroke="#fbbf24" strokeWidth="4" strokeLinecap="round"/>
+              <circle cx="50" cy="50" r="22" fill="#f59e0b"/>
+              <path d="M28 50C36 40 43 36 50 36C57 36 64 40 72 50C64 60 57 64 50 64C43 64 36 60 28 50Z" fill="#120f0c" stroke="#fbbf24" strokeWidth="2.5"/>
+              <circle cx="50" cy="50" r="8" fill="#fbbf24"/>
+            </svg>
+          </div>
           <h2 className="text-2xl font-black text-slate-900 mb-1">Welcome to ArthVed</h2>
           <p className="text-xs text-slate-500 mb-6">Surya ki urja, Nayan ki drishti — har hisab ekdam saaf.</p>
           <div className="space-y-3">
@@ -415,8 +427,16 @@ export default function HisabApp() {
       <AnimStyles />
       <aside className="w-64 bg-white border-r border-amber-200 hidden md:flex flex-col justify-between p-6 shadow-sm">
         <div>
+          {/* SURYA & NAYAN LOGO IN SIDEBAR HEADER */}
           <div className="flex items-center gap-3 mb-8 pb-4 border-b border-amber-100">
-            <span className="av-flame text-3xl">🪔</span>
+            <svg width="38" height="38" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]">
+              <circle cx="50" cy="50" r="48" fill="#120f0c" stroke="#f59e0b" strokeWidth="3.5"/>
+              <path d="M50 10V20M50 80V90M10 50H20M80 50H90M22 22L29 29M71 71L78 78M22 78L29 71M71 29L78 22" stroke="#fbbf24" strokeWidth="4" strokeLinecap="round"/>
+              <circle cx="50" cy="50" r="24" fill="#f59e0b"/>
+              <path d="M26 50C34 38 42 34 50 34C58 34 66 38 74 50C66 62 58 66 50 66C42 66 34 62 26 50Z" fill="#120f0c" stroke="#fbbf24" strokeWidth="2.5"/>
+              <circle cx="50" cy="50" r="9" fill="#fbbf24"/>
+              <circle cx="52" cy="48" r="3" fill="#120f0c"/>
+            </svg>
             <div>
               <h1 className="av-title font-black text-lg leading-tight">ArthVed</h1>
               <p className="text-[10px] text-amber-600 font-bold uppercase tracking-wider">Ayodhya Edition</p>
@@ -553,7 +573,6 @@ export default function HisabApp() {
           </div>
         )}
 
-        {/* BANK ACCOUNTS MANAGEMENT (3rd Point: User-driven) */}
         {activeTab === 'Bank Accounts' && (
           <div className="space-y-6 mb-12 max-w-3xl">
             <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
@@ -640,7 +659,6 @@ export default function HisabApp() {
         )}
       </main>
 
-      {/* TRANSACTION MODAL WITH VOICE & 4th Point: SMART CLIPBOARD SMS SNIFFER */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-amber-200">
@@ -649,7 +667,6 @@ export default function HisabApp() {
               <button type="button" onClick={() => { setIsModalOpen(false); setDetectedSms(''); }} className="text-slate-400 hover:text-rose-600 text-xl font-bold p-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer">✕</button>
             </div>
 
-            {/* QUICK ACTIONS: VOICE & 4th Point: CLIPBOARD SMS SNIFFER */}
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-2xl flex flex-col justify-between">
                 <p className="text-[11px] font-bold text-amber-900 mb-1">🎙️ Voice Ledger</p>
