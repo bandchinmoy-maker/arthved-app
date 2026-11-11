@@ -20,7 +20,7 @@ const screenCls = 'min-h-screen bg-[#120f0c] flex items-center justify-center p-
 const inputCls = 'w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white';
 const labelCls = 'block text-xs font-bold text-slate-700 uppercase mb-1';
 const primaryBtn = 'w-full py-3.5 bg-amber-800 hover:bg-amber-900 text-white font-bold text-sm rounded-xl shadow-md transition cursor-pointer';
-const emptyTx = { text: '', amount: '', type: 'income', category: 'General', paymentMode: 'Cash', bankAccount: 'Cash' };
+const emptyTx = { text: '', amount: '', type: 'income', category: 'General', paymentMode: 'Cash', bankAccount: 'Main Cash Drawer' };
 
 const AnimStyles = () => (
   <style>{`
@@ -58,13 +58,13 @@ export default function HisabApp() {
   const [biz, setBiz] = useState({ name: '', owner: '', gstin: '', phone: '', address: '' });
   const [bizSaved, setBizSaved] = useState(false);
 
-  // Bank Accounts Management State
+  // Bank Accounts (Starts with only Cash Drawer, no dummy banks)
   const [bankAccounts, setBankAccounts] = useState([
-    { id: 1, name: 'Main Cash Drawer', type: 'Cash', accountNo: 'Cash' },
-    { id: 2, name: 'HDFC Bank Primary', type: 'Bank', accountNo: '**** 4321' }
+    { id: 1, name: 'Main Cash Drawer', type: 'Cash', accountNo: 'Cash' }
   ]);
   const [bankForm, setBankForm] = useState({ name: '', type: 'Bank', accountNo: '' });
   const [isListening, setIsListening] = useState(false);
+  const [detectedSms, setDetectedSms] = useState('');
 
   const saveDues = (list) => { setDues(list); localStorage.setItem('arthved_dues', JSON.stringify(list)); };
   
@@ -76,7 +76,7 @@ export default function HisabApp() {
   };
 
   const receiveDue = (due) => {
-    const newTx = { id: Date.now(), text: `Received from ${due.party}`, amount: due.amount, type: 'income', category: 'Udhaar Wapasi', paymentMode: 'Cash', bankAccount: 'Cash', date: new Date().toLocaleDateString() };
+    const newTx = { id: Date.now(), text: `Received from ${due.party}`, amount: due.amount, type: 'income', category: 'Udhaar Wapasi', paymentMode: 'Cash', bankAccount: 'Main Cash Drawer', date: new Date().toLocaleDateString() };
     const updated = [newTx, ...transactions];
     setTransactions(updated);
     localStorage.setItem('arthved_tx', JSON.stringify(updated));
@@ -107,7 +107,7 @@ export default function HisabApp() {
     localStorage.setItem('arthved_banks', JSON.stringify(updatedBanks));
   };
 
-  // Voice Ledger Feature using Web Speech API
+  // Voice Ledger Feature
   const startVoiceRecognition = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -115,13 +115,12 @@ export default function HisabApp() {
       return;
     }
     const recognition = new SpeechRecognition();
-    recognition.lang = 'hi-IN'; // supports Hindi & Indian English mix
+    recognition.lang = 'hi-IN';
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
     recognition.onerror = () => setIsListening(false);
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
-      // Simple smart parser for voice command e.g., "500 chai ka kharcha" or "paid 1000 rent"
       const numberMatch = transcript.match(/\d+/);
       const amount = numberMatch ? numberMatch[0] : '';
       const text = transcript.replace(/\d+/g, '').trim();
@@ -137,8 +136,38 @@ export default function HisabApp() {
     recognition.start();
   };
 
+  // Smart Clipboard SMS Sniffer Feature
+  const checkClipboardForSMS = async () => {
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.readText) {
+        alert("Clipboard access not available.");
+        return;
+      }
+      const text = await navigator.clipboard.readText();
+      if (!text) {
+        alert("Clipboard is empty.");
+        return;
+      }
+      const numMatch = text.match(/(?:Rs\.?|INR|₹)\s*(\d+)/i) || text.match(/\b\d+\b/);
+      const amount = numMatch ? (numMatch[1] || numMatch[0]) : '';
+      const isExpense = text.toLowerCase().includes('debited') || text.toLowerCase().includes('paid') || text.toLowerCase().includes('sent');
+      
+      setDetectedSms(text);
+      setTxData(prev => ({
+        ...prev,
+        text: text.slice(0, 40) + '...',
+        amount: amount,
+        type: isExpense ? 'expense' : 'income',
+        paymentMode: 'Online'
+      }));
+    } catch (err) {
+      console.error("Clipboard read failed", err);
+      alert("Please allow clipboard permission to read SMS.");
+    }
+  };
+
   const downloadCSV = () => {
-    const rows = [['Date', 'Description', 'Category', 'Payment Mode', 'Bank Account', 'Type', 'Amount'], ...transactions.map((t) => [t.date, t.text, t.category, t.paymentMode, t.bankAccount || 'Cash', t.type, t.amount])];
+    const rows = [['Date', 'Description', 'Category', 'Payment Mode', 'Bank Account', 'Type', 'Amount'], ...transactions.map((t) => [t.date, t.text, t.category, t.paymentMode, t.bankAccount || 'Main Cash Drawer', t.type, t.amount])];
     const csv = rows.map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
@@ -230,7 +259,7 @@ export default function HisabApp() {
     setTransactions(updated);
     localStorage.setItem('arthved_tx', JSON.stringify(updated));
 
-    // FEATURE 1: Credit Sales Automation -> Automatically sync to 'To collect' list!
+    // Credit Sales Automation
     if (txData.paymentMode === 'Credit Sales') {
       const newDue = {
         id: Date.now() + 1,
@@ -243,6 +272,7 @@ export default function HisabApp() {
 
     setIsModalOpen(false);
     setTxData(emptyTx);
+    setDetectedSms('');
   };
 
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((a, c) => a + c.amount, 0);
@@ -367,7 +397,7 @@ export default function HisabApp() {
                   <td className="py-3 px-4 font-semibold text-slate-800">{tx.text}</td>
                   <td className="py-3 px-4 text-slate-600">{tx.category || 'General'}</td>
                   <td className="py-3 px-4"><span className="bg-amber-100 text-amber-900 text-xs px-2 py-1 rounded-md font-bold">{tx.paymentMode || 'Cash'}</span></td>
-                  <td className="py-3 px-4"><span className="bg-slate-100 text-slate-800 text-xs px-2 py-1 rounded-md font-medium">🏦 {tx.bankAccount || 'Cash'}</span></td>
+                  <td className="py-3 px-4"><span className="bg-slate-100 text-slate-800 text-xs px-2 py-1 rounded-md font-medium">🏦 {tx.bankAccount || 'Main Cash Drawer'}</span></td>
                   <td className={`py-3 px-4 font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {tx.type === 'income' ? '+' : '-'} ₹ {Math.abs(tx.amount).toLocaleString()}
                   </td>
@@ -523,12 +553,12 @@ export default function HisabApp() {
           </div>
         )}
 
-        {/* BANK ACCOUNTS PROVISION */}
+        {/* BANK ACCOUNTS MANAGEMENT (3rd Point: User-driven) */}
         {activeTab === 'Bank Accounts' && (
           <div className="space-y-6 mb-12 max-w-3xl">
             <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
-              <h2 className="text-xl font-bold text-amber-900 mb-1">🏦 Bank & Online Accounts Provision</h2>
-              <p className="text-xs text-slate-500 mb-4">Add your bank accounts or wallets here to securely tag your online transactions manually or via voice.</p>
+              <h2 className="text-xl font-bold text-amber-900 mb-1">🏦 Bank & Online Accounts Management</h2>
+              <p className="text-xs text-slate-500 mb-4">Add your personal bank accounts or UPI IDs here so you can tag your transactions accurately.</p>
               
               <form onSubmit={handleAddBank} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-6">
                 <div><label className={labelCls}>Account Name</label><input type="text" required placeholder="Jaise: SBI Current, Paytm" value={bankForm.name} onChange={(e) => setBankForm({ ...bankForm, name: e.target.value })} className={inputCls} /></div>
@@ -610,29 +640,45 @@ export default function HisabApp() {
         )}
       </main>
 
-      {/* TRANSACTION MODAL WITH VOICE LEDGER FEATURE */}
+      {/* TRANSACTION MODAL WITH VOICE & 4th Point: SMART CLIPBOARD SMS SNIFFER */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-amber-200">
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-amber-100">
               <h3 className="text-lg font-bold text-amber-900">Naya Karma Lekha Jodein</h3>
-              <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-rose-600 text-xl font-bold p-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer">✕</button>
+              <button type="button" onClick={() => { setIsModalOpen(false); setDetectedSms(''); }} className="text-slate-400 hover:text-rose-600 text-xl font-bold p-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer">✕</button>
             </div>
 
-            {/* VOICE LEDGER BUTTON */}
-            <div className="mb-4 bg-amber-50 border border-amber-200 p-3 rounded-2xl flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-amber-900">Voice Ledger (AI Mic)</p>
-                <p className="text-[10px] text-slate-500">Bolkar entry bharein (Jaise: "500 chai ka kharcha")</p>
+            {/* QUICK ACTIONS: VOICE & 4th Point: CLIPBOARD SMS SNIFFER */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-2xl flex flex-col justify-between">
+                <p className="text-[11px] font-bold text-amber-900 mb-1">🎙️ Voice Ledger</p>
+                <button 
+                  type="button" 
+                  onClick={startVoiceRecognition}
+                  className={`w-full py-1.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1 cursor-pointer shadow transition ${isListening ? 'bg-rose-600 text-white animate-pulse' : 'bg-amber-800 text-white hover:bg-amber-900'}`}
+                >
+                  {isListening ? 'Sun rahe hain...' : 'Bolie'}
+                </button>
               </div>
-              <button 
-                type="button" 
-                onClick={startVoiceRecognition}
-                className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow transition ${isListening ? 'bg-rose-600 text-white animate-pulse' : 'bg-amber-800 text-white hover:bg-amber-900'}`}
-              >
-                <span>🎙️</span> {isListening ? 'Sun rahe hain...' : 'Bolie'}
-              </button>
+
+              <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-2xl flex flex-col justify-between">
+                <p className="text-[11px] font-bold text-amber-900 mb-1">📋 SMS Auto-Paste</p>
+                <button 
+                  type="button" 
+                  onClick={checkClipboardForSMS}
+                  className="w-full py-1.5 bg-amber-800 hover:bg-amber-900 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 cursor-pointer shadow transition"
+                >
+                  Detect SMS
+                </button>
+              </div>
             </div>
+
+            {detectedSms && (
+              <div className="mb-4 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl text-[11px] text-emerald-900">
+                <span className="font-bold">💡 SMS Detected & Auto-Filled:</span> {detectedSms}
+              </div>
+            )}
 
             <form onSubmit={handleAddTransaction} className="space-y-4">
               <div>
@@ -676,7 +722,7 @@ export default function HisabApp() {
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-amber-100">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">Cancel</button>
+                <button type="button" onClick={() => { setIsModalOpen(false); setDetectedSms(''); }} className="px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">Cancel</button>
                 <button type="submit" className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all cursor-pointer">Surakshit Karein</button>
               </div>
             </form>
