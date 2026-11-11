@@ -1,4 +1,4 @@
-'use client'
+'use content'
 
 import React, { useState, useEffect } from 'react'
 
@@ -7,20 +7,27 @@ const ramayanaSlides = [
     name: "Shri Ram (श्री राम)",
     title: "Maryada Purushottam — The Supreme Ideal",
     deed: "Pita ke vachan hetu 14 varsh ka vanvas sweekar kiya aur asatya par satya ki vijay sthapit karke maryada ka adarsh sthapit kiya.",
-    image: "https://images.unsplash.com/photo-1609342122563-a43ac8917a3a?q=80&w=1000&auto=format&fit=crop", // Cinematic spiritual representation
+    image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop", // Divine Indian Art Depiction
     badge: "Divine Epitome"
   },
   {
     name: "Mata Sita (माता सीता)",
     title: "Pavitrata & Tyag ki Moorti",
-    deed: "Rajya ke sabhi sukhon ka tyag karke vanvas mein sahayatri bani, atulya dhairya aur aatma-bal ka sacho parichay diya.",
-    image: "https://images.unsplash.com/photo-1590073844006-33379778ae09?q=80&w=1000&auto=format&fit=crop",
+    deed: "Rajya ke sabhi sukhon ka tyag karke vanvas mein sahayatri bani, atulya dhairya aur aatma-bal ka sacha parichay diya.",
+    image: "https://images.unsplash.com/photo-1609342122563-a43ac8917a3a?q=80&w=1000&auto=format&fit=crop", 
     badge: "Grace & Resilience"
+  },
+  {
+    name: "Lakshman ji (लक्ष्मण जी)",
+    title: "Bhratruprem & Nishtha",
+    deed: "Bina ek pal soche bade bhai Shri Ram aur bhabhi ke sath vanvas gaye aur din-raat adig pehra dekar lakshman rekha ki maryada rakhi.",
+    image: "https://images.unsplash.com/photo-1590073844006-33379778ae09?q=80&w=1000&auto=format&fit=crop",
+    badge: "Eternal Loyalty"
   },
   {
     name: "Hanuman ji (हनुमान जी)",
     title: "Pawanputra & Sankat Mochan",
-    deed: "Samudra langh kar Lanka mein Mata Sita ki khoj ki, Lanka dahan kiya aur apani bhakti se amar kirti sthapit ki.",
+    deed: "Samudra langh kar Lanka mein Mata Sita ki khoj ki, Lanka dahan kiya aur Sanjeevani booti laakar lakshman ji ke pran bachaye.",
     image: "https://images.unsplash.com/photo-1567157577867-05ccb1388e66?q=80&w=1000&auto=format&fit=crop",
     badge: "Supreme Devotee"
   },
@@ -32,16 +39,30 @@ const ramayanaSlides = [
     badge: "Brave Protector"
   },
   {
-    name: "Sugriva & Vanara Sena (सुग्रीव व वानर सेना)",
-    title: "Kishkindha Allies & Builders",
-    deed: "Mitrata ka sacha dharm nibhate hue mahan Vanara sena ke sath Ram Setu ka nirmaan kiya aur Asaty par vijay paayi.",
+    name: "Sugriva & Angada (सुग्रीव व अंगद)",
+    title: "Kishkindha Leaders",
+    deed: "Shri Ram ke sath sachha mitrata ka vachan nibhaya aur mahan Vanara sena ka netritva karke adharm ka nash kiya.",
     image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop",
-    badge: "Eternal Alliance"
+    badge: "Vanara Strength"
+  },
+  {
+    name: "Jambavan (जाम्बवान जी)",
+    title: "Riksharaj & Wise Elder",
+    deed: "Apni agya aur gyan se Hanuman ji ko unki alaukik shaktiyon ka smaran karaya aur yuddh mein param margdarshan diya.",
+    image: "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1000&auto=format&fit=crop",
+    badge: "Divine Wisdom"
+  },
+  {
+    name: "Nala & Nila (नल और नीलकंठ)",
+    title: "Divine Architects",
+    deed: "Vishwakarma ke aashirwad aur gyan se samudra par mahan 'Ram Setu' ka nirmaan kiya jisse sena Lanka pahunchi.",
+    image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop",
+    badge: "Master Engineers"
   }
 ];
 
 export default function HisabApp() {
-  const [step, setStep] = useState('loading'); // loading -> welcome -> register -> login -> dashboard
+  const [step, setStep] = useState('loading');
   const [activeTab, setActiveTab] = useState('Overview');
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -54,7 +75,6 @@ export default function HisabApp() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [txData, setTxData] = useState({ text: '', amount: '', type: 'income', category: 'General', paymentMode: 'Cash' });
 
-  // Initial App Load & Auto Sliding Cinematic Ramayana Background Effect
   useEffect(() => {
     const timer = setTimeout(() => {
       const savedUser = localStorage.getItem('arthved_user');
@@ -63,10 +83,11 @@ export default function HisabApp() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Auto slide characters every 5 seconds
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % ramayanaSlides.length);
-    }, 4500); // Changes slide smoothly every 4.5 seconds
+    }, 5000);
     return () => clearInterval(slideInterval);
   }, []);
 
@@ -111,7 +132,7 @@ export default function HisabApp() {
   const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const netBalance = totalIncome - totalExpense;
 
-  // 1. LOADING INTRO ANIMATION
+  // 1. LOADING ANIMATION
   if (step === 'loading') {
     return (
       <div className="min-h-screen bg-[#120f0c] flex flex-col items-center justify-center font-sans text-amber-100">
@@ -124,11 +145,10 @@ export default function HisabApp() {
     );
   }
 
-  // 2. WELCOME / NEW OR OLD USER
+  // 2. WELCOME SCREEN
   if (step === 'welcome') {
     return (
-      <div className="min-h-screen bg-[#120f0c] flex items-center justify-center p-4 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-cover bg-center" style={{ backgroundImage: `url(${ramayanaSlides[0].image})` }}></div>
+      <div className="min-h-screen bg-[#120f0c] flex items-center justify-center p-4">
         <div className="bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl max-w-md w-full border border-amber-300/40 text-center relative z-10">
           <div className="w-16 h-16 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">👁️</div>
           <h2 className="text-2xl font-black text-slate-900 mb-1">Welcome to ArthVed</h2>
@@ -252,7 +272,7 @@ export default function HisabApp() {
     );
   }
 
-  // 5. FULL DASHBOARD WITH SIDEBAR & CINEMATIC RAMAYANA EXPERIENCE BANNER
+  // 5. FULL DASHBOARD WITH SIDEBAR & INDIVIDUAL CHARACTER CINEMATIC SLIDESHOW
   const slide = ramayanaSlides[currentSlide];
 
   return (
@@ -311,111 +331,124 @@ export default function HisabApp() {
               onClick={() => setIsModalOpen(true)}
               className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-4 py-2.5 rounded-xl font-bold text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
             >
-              <span>➕</span> Add Sale
+              <span>➕</span> Add Sale / Expense
             </button>
           </div>
         </header>
 
-        {/* 🌟 CINEMATIC RAMAYANA EXPERIENCE BANNER (AUTO-SLIDING / FADING BACKGROUND EXPERIENCE) */}
-        <div className="relative w-full rounded-3xl overflow-hidden shadow-xl border border-amber-300 mb-8 bg-slate-900 text-white min-h-[300px] flex items-center">
-          {/* Background Image with Cinematic Overlay */}
+        {/* 🌟 INDIVIDUAL CHARACTER CINEMATIC SLIDESHOW BANNER */}
+        <div className="relative w-full rounded-3xl overflow-hidden shadow-xl border border-amber-300 mb-8 bg-slate-900 text-white min-h-[320px] flex items-center">
           <div 
-            className="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105 opacity-40"
+            className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-30 filter blur-[1px]"
             style={{ backgroundImage: `url(${slide.image})` }}
           ></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-transparent"></div>
 
-          {/* Banner Content */}
-          <div className="relative z-10 p-6 md:p-10 max-w-3xl">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="bg-amber-500/90 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow">
-                {slide.badge}
-              </span>
-              <span className="text-amber-400 text-xs font-bold tracking-wider">✦ Valmiki Ramayana Chronicle ✦</span>
+          <div className="relative z-10 p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 w-full">
+            <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl overflow-hidden border-2 border-amber-400/80 shadow-2xl flex-shrink-0 bg-amber-950">
+              <img src={slide.image} alt={slide.name} className="w-full h-full object-cover" />
             </div>
-            
-            <h3 className="text-2xl md:text-3xl font-black text-amber-100 tracking-wide mb-2">
-              {slide.name}
-            </h3>
-            <p className="text-amber-400 text-xs font-bold mb-3">{slide.title}</p>
-            <p className="text-slate-300 text-xs md:text-sm leading-relaxed font-medium">
-              "{slide.deed}"
-            </p>
 
-            {/* Slide Indicators */}
-            <div className="flex items-center gap-2 mt-6">
-              {ramayanaSlides.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    currentSlide === idx ? 'w-8 bg-amber-400' : 'w-2 bg-white/30 hover:bg-white/60'
-                  }`}
-                />
-              ))}
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="bg-amber-500 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow">
+                  {slide.badge}
+                </span>
+                <span className="text-amber-300 text-xs font-bold">✦ Valmiki Ramayana Chronicle ✦</span>
+              </div>
+              
+              <h3 className="text-2xl md:text-3xl font-black text-amber-100 tracking-wide mb-1">
+                {slide.name}
+              </h3>
+              <p className="text-amber-400 text-xs font-bold mb-2">{slide.title}</p>
+              <p className="text-slate-200 text-xs md:text-sm leading-relaxed font-medium max-w-2xl">
+                "{slide.deed}"
+              </p>
+
+              <div className="flex items-center gap-2 mt-4">
+                {ramayanaSlides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentSlide(idx)}
+                    className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                      currentSlide === idx ? 'w-8 bg-amber-400' : 'w-2 bg-white/30 hover:bg-white/60'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Financial Stat Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Net Balance (Kosh)</p>
-            <h3 className={`text-2xl font-black mt-2 ${netBalance >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-              ₹ {netBalance.toLocaleString()}
-            </h3>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Aagman (Total Income)</p>
-            <h3 className="text-2xl font-black mt-2 text-emerald-600">₹ {totalIncome.toLocaleString()}</h3>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Vyaya (Total Expense)</p>
-            <h3 className="text-2xl font-black mt-2 text-rose-600">₹ {totalExpense.toLocaleString()}</h3>
-          </div>
-        </div>
-
-        {/* Transactions List */}
-        <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6 mb-12">
-          <h2 className="text-xl font-bold text-amber-900 mb-4 flex items-center gap-2">
-            <span>📜</span> Karma Lekha (Recent Transactions)
-          </h2>
-          {transactions.length === 0 ? (
-            <p className="text-sm text-slate-500 py-8 text-center">Abhi tak koi bhi len-den darj nahi kiya gaya hai.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-amber-100 text-xs text-amber-900 uppercase">
-                    <th className="py-3 px-4">Vivaran (Description)</th>
-                    <th className="py-3 px-4">Category</th>
-                    <th className="py-3 px-4">Payment Mode</th>
-                    <th className="py-3 px-4">Rashi (Amount)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-amber-50 text-sm">
-                  {transactions.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-amber-50/50">
-                      <td className="py-3 px-4 font-semibold text-slate-800">{tx.text}</td>
-                      <td className="py-3 px-4 text-slate-600">{tx.category || 'General'}</td>
-                      <td className="py-3 px-4">
-                        <span className="bg-amber-100 text-amber-900 text-xs px-2 py-1 rounded-md font-bold">
-                          {tx.paymentMode || 'Cash'}
-                        </span>
-                      </td>
-                      <td className={`py-3 px-4 font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {tx.type === 'income' ? '+' : '-'} ₹ {Math.abs(tx.amount).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Conditional Tab Rendering */}
+        {activeTab === 'Overview' && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Net Balance (Kosh)</p>
+                <h3 className={`text-2xl font-black mt-2 ${netBalance >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                  ₹ {netBalance.toLocaleString()}
+                </h3>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Aagman (Total Income)</p>
+                <h3 className="text-2xl font-black mt-2 text-emerald-600">₹ {totalIncome.toLocaleString()}</h3>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Vyaya (Total Expense)</p>
+                <h3 className="text-2xl font-black mt-2 text-rose-600">₹ {totalExpense.toLocaleString()}</h3>
+              </div>
             </div>
-          )}
-        </div>
+
+            <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6 mb-12">
+              <h2 className="text-xl font-bold text-amber-900 mb-4 flex items-center gap-2">
+                <span>📜</span> Karma Lekha (Recent Transactions)
+              </h2>
+              {transactions.length === 0 ? (
+                <p className="text-sm text-slate-500 py-8 text-center">Abhi tak koi bhi len-den darj nahi kiya gaya hai.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-amber-100 text-xs text-amber-900 uppercase">
+                        <th className="py-3 px-4">Vivaran (Description)</th>
+                        <th className="py-3 px-4">Category</th>
+                        <th className="py-3 px-4">Payment Mode</th>
+                        <th className="py-3 px-4">Rashi (Amount)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-amber-50 text-sm">
+                      {transactions.map((tx) => (
+                        <tr key={tx.id} className="hover:bg-amber-50/50">
+                          <td className="py-3 px-4 font-semibold text-slate-800">{tx.text}</td>
+                          <td className="py-3 px-4 text-slate-600">{tx.category || 'General'}</td>
+                          <td className="py-3 px-4">
+                            <span className="bg-amber-100 text-amber-900 text-xs px-2 py-1 rounded-md font-bold">
+                              {tx.paymentMode || 'Cash'}
+                            </span>
+                          </td>
+                          <td className={`py-3 px-4 font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            {tx.type === 'income' ? '+' : '-'} ₹ {Math.abs(tx.amount).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeTab !== 'Overview' && (
+          <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-8 text-center">
+            <h3 className="text-xl font-bold text-amber-900 mb-2">{activeTab} Module</h3>
+            <p className="text-sm text-slate-500">This section of {activeTab} is synchronized with your secure ArthVed Vault.</p>
+          </div>
+        )}
       </main>
 
-      {/* Transaction Modal with Cancel Button */}
+      {/* Transaction Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-amber-200 relative animate-in fade-in zoom-in duration-200">
