@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 const ramayanaSlides = [
   { name: "Shri Ram (श्री राम)", title: "Maryada Purushottam — The Supreme Ideal", deed: "Pita ke vachan hetu 14 varsh ka vanvas sweekar kiya aur asatya par satya ki vijay sthapit karke maryada ka adarsh sthapit kiya.", symbol: "🏹", badge: "Divine Epitome" },
@@ -66,6 +66,25 @@ export default function HisabApp() {
   const [bankForm, setBankForm] = useState({ name: '', type: 'Bank', accountNo: '' });
   const [isListening, setIsListening] = useState(false);
   const [detectedSms, setDetectedSms] = useState('');
+
+  // Audio Player States
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(err => {
+        console.error("Audio playback failed:", err);
+        alert("Please place your audio file in public folder or check audio source.");
+      });
+    }
+  };
 
   const saveDues = (list) => { setDues(list); localStorage.setItem('arthved_dues', JSON.stringify(list)); };
   
@@ -281,6 +300,7 @@ export default function HisabApp() {
     return (
       <div className="min-h-screen bg-[#120f0c] flex flex-col items-center justify-center font-sans text-amber-100 overflow-hidden relative">
         <AnimStyles />
+        <audio ref={audioRef} src="/music.mp3" loop />
         <div className="relative mb-8">
           <div className="av-ring absolute -inset-6 rounded-full border-2 border-dashed border-amber-500/40"></div>
           <div className="av-glow w-28 h-28 bg-gradient-to-tr from-amber-600 to-amber-400 rounded-full flex items-center justify-center text-5xl border border-amber-300/40">
@@ -300,8 +320,6 @@ export default function HisabApp() {
           ))}
         </h1>
         <p className="av-fade text-xs text-amber-200/60 mt-3 font-medium tracking-wider uppercase">Financial Science & Vision • Ayodhya Edition</p>
-        
-        {/* Creator Signature in Loading Screen */}
         <div className="absolute bottom-6 text-amber-300/80 text-sm signature-font tracking-wide">
           Crafted by Chinmoy Suryakant Band
         </div>
@@ -312,6 +330,7 @@ export default function HisabApp() {
   if (step === 'welcome') {
     return (
       <div className={screenCls + " relative"}>
+        <audio ref={audioRef} src="/music.mp3" loop />
         <div className="bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl max-w-md w-full border border-amber-300/40 text-center">
           <div className="w-16 h-16 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
             <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -339,6 +358,7 @@ export default function HisabApp() {
   if (step === 'register') {
     return (
       <div className={screenCls + " relative"}>
+        <audio ref={audioRef} src="/music.mp3" loop />
         <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full border border-amber-200">
           <h2 className="text-xl font-black text-amber-900 mb-1">Create Your Vault</h2>
           <p className="text-xs text-slate-500 mb-6">Set your name and a PIN to protect your accounts on this device.</p>
@@ -369,6 +389,7 @@ export default function HisabApp() {
   if (step === 'login') {
     return (
       <div className={screenCls + " relative"}>
+        <audio ref={audioRef} src="/music.mp3" loop />
         <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full border border-amber-200 text-center">
           <div className="w-12 h-12 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">🔒</div>
           <h2 className="text-2xl font-black text-slate-900 mb-1">Unlock ArthVed Vault</h2>
@@ -440,6 +461,8 @@ export default function HisabApp() {
   return (
     <div className="min-h-screen bg-[#fefcf6] text-slate-800 flex font-sans">
       <AnimStyles />
+      <audio ref={audioRef} src="/music.mp3" loop />
+      
       <aside className="w-64 bg-white border-r border-amber-200 hidden md:flex flex-col justify-between p-6 shadow-sm">
         <div>
           <div className="flex items-center gap-3 mb-8 pb-4 border-b border-amber-100">
@@ -468,11 +491,29 @@ export default function HisabApp() {
             ))}
           </nav>
         </div>
-        <div className="pt-4 border-t border-amber-100">
-          <div className="mb-3 text-center text-amber-900/70 text-sm signature-font">
+
+        {/* Empty Space Music Widget & Creator Signature Integration */}
+        <div className="pt-4 border-t border-amber-100 space-y-3">
+          <div className="bg-amber-50 border border-amber-200/60 p-3 rounded-2xl text-center shadow-inner">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-bold text-amber-900 uppercase">🎵 Divine Dhun</span>
+              <button 
+                onClick={toggleMusic}
+                className="bg-amber-800 hover:bg-amber-900 text-white text-xs px-3 py-1 rounded-lg font-bold shadow transition cursor-pointer"
+              >
+                {isPlaying ? '⏸ Pause' : '▶ Play'}
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-600 font-medium leading-tight">
+              Music by <span className="font-bold text-amber-900">Kalpesh Ajugia</span> from <span className="font-bold text-amber-900">Pixabay</span>[cite: 5]
+            </p>
+          </div>
+
+          <div className="text-center text-amber-900/70 text-sm signature-font">
             Chinmoy Suryakant Band
           </div>
-          <button onClick={handleLock} className="w-full py-2.5 px-4 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer">
+
+          <button onClick={handleLock} className="w-full py-2 px-4 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer">
             <span>🔒</span> Lock Vault
           </button>
         </div>
@@ -673,14 +714,12 @@ export default function HisabApp() {
             <button type="submit" className={primaryBtn}>Surakshit Karein 💾</button>
             {bizSaved && <p className="text-sm text-emerald-600 font-bold text-center">✔ Saved on this device!</p>}
             
-            {/* Creator Signature in Business Setup Tab */}
             <div className="pt-4 border-t border-amber-100 text-center text-amber-900/60 text-sm signature-font">
               Chinmoy Suryakant Band
             </div>
           </form>
         )}
 
-        {/* Global Footer Signature for Main Content */}
         <footer className="mt-12 py-4 border-t border-amber-200/60 text-center text-amber-900/60 text-sm signature-font">
           ArthVed • Designed & Developed by Chinmoy Suryakant Band
         </footer>
@@ -753,7 +792,7 @@ export default function HisabApp() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className= {labelCls}>Bank / Account Tag</label>
+                  <label className={labelCls}>Bank / AccountTag</label>
                   <select value={txData.bankAccount} onChange={(e) => setTxData({ ...txData, bankAccount: e.target.value })} className={inputCls}>
                     {bankAccounts.map(b => (
                       <option key={b.id} value={b.name}>{b.name}</option>
