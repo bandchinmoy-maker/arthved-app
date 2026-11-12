@@ -24,6 +24,8 @@ const emptyTx = { text: '', amount: '', type: 'income', category: 'General', pay
 
 const AnimStyles = () => (
   <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap');
+    .signature-font { font-family: 'Dancing Script', cursive; }
     @keyframes av-rise{from{opacity:0;transform:translateY(24px) scale(.8)}to{opacity:1;transform:none}}
     @keyframes av-shine{0%{background-position:0% 50%}100%{background-position:200% 50%}}
     @keyframes av-flame{0%,100%{transform:scale(1) rotate(-3deg);filter:drop-shadow(0 0 6px #f59e0b)}50%{transform:scale(1.12) rotate(3deg);filter:drop-shadow(0 0 16px #fbbf24)}}
@@ -277,12 +279,11 @@ export default function HisabApp() {
 
   if (step === 'loading') {
     return (
-      <div className="min-h-screen bg-[#120f0c] flex flex-col items-center justify-center font-sans text-amber-100 overflow-hidden">
+      <div className="min-h-screen bg-[#120f0c] flex flex-col items-center justify-center font-sans text-amber-100 overflow-hidden relative">
         <AnimStyles />
         <div className="relative mb-8">
           <div className="av-ring absolute -inset-6 rounded-full border-2 border-dashed border-amber-500/40"></div>
           <div className="av-glow w-28 h-28 bg-gradient-to-tr from-amber-600 to-amber-400 rounded-full flex items-center justify-center text-5xl border border-amber-300/40">
-            {/* Surya & Nayan Logo in Loading Screen */}
             <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="50" cy="50" r="48" fill="#120f0c" stroke="#f59e0b" strokeWidth="4"/>
               <path d="M50 8V18M50 82V92M8 50H18M82 50H92M20 20L27 27M73 73L80 80M20 80L27 73M73 27L80 20" stroke="#fbbf24" strokeWidth="4" strokeLinecap="round"/>
@@ -299,13 +300,18 @@ export default function HisabApp() {
           ))}
         </h1>
         <p className="av-fade text-xs text-amber-200/60 mt-3 font-medium tracking-wider uppercase">Financial Science & Vision • Ayodhya Edition</p>
+        
+        {/* Creator Signature in Loading Screen */}
+        <div className="absolute bottom-6 text-amber-300/80 text-sm signature-font tracking-wide">
+          Crafted by Chinmoy Suryakant Band
+        </div>
       </div>
     );
   }
 
   if (step === 'welcome') {
     return (
-      <div className={screenCls}>
+      <div className={screenCls + " relative"}>
         <div className="bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl max-w-md w-full border border-amber-300/40 text-center">
           <div className="w-16 h-16 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
             <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -322,6 +328,9 @@ export default function HisabApp() {
             <button onClick={() => setStep('register')} className={primaryBtn}>✨ New User (Register Vault)</button>
             <button onClick={() => setStep('login')} className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm rounded-xl transition cursor-pointer">🔑 Old User (Unlock Vault)</button>
           </div>
+          <div className="mt-6 pt-4 border-t border-amber-100 text-amber-900/60 text-sm signature-font">
+            Chinmoy Suryakant Band
+          </div>
         </div>
       </div>
     );
@@ -329,7 +338,7 @@ export default function HisabApp() {
 
   if (step === 'register') {
     return (
-      <div className={screenCls}>
+      <div className={screenCls + " relative"}>
         <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full border border-amber-200">
           <h2 className="text-xl font-black text-amber-900 mb-1">Create Your Vault</h2>
           <p className="text-xs text-slate-500 mb-6">Set your name and a PIN to protect your accounts on this device.</p>
@@ -349,6 +358,9 @@ export default function HisabApp() {
             <button type="submit" className={primaryBtn + ' mt-2'}>INITIALIZE ARTHVED VAULT 🚀</button>
             <button type="button" onClick={() => setStep('welcome')} className="w-full text-xs text-slate-500 hover:underline mt-2 text-center block">← Back to Welcome</button>
           </form>
+          <div className="mt-6 text-center text-amber-900/60 text-sm signature-font">
+            Chinmoy Suryakant Band
+          </div>
         </div>
       </div>
     );
@@ -356,7 +368,7 @@ export default function HisabApp() {
 
   if (step === 'login') {
     return (
-      <div className={screenCls}>
+      <div className={screenCls + " relative"}>
         <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full border border-amber-200 text-center">
           <div className="w-12 h-12 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">🔒</div>
           <h2 className="text-2xl font-black text-slate-900 mb-1">Unlock ArthVed Vault</h2>
@@ -377,6 +389,9 @@ export default function HisabApp() {
           >
             Reset Vault / Register New Account
           </button>
+          <div className="mt-6 text-amber-900/60 text-sm signature-font">
+            Chinmoy Suryakant Band
+          </div>
         </div>
       </div>
     );
@@ -427,7 +442,6 @@ export default function HisabApp() {
       <AnimStyles />
       <aside className="w-64 bg-white border-r border-amber-200 hidden md:flex flex-col justify-between p-6 shadow-sm">
         <div>
-          {/* SURYA & NAYAN LOGO IN SIDEBAR HEADER */}
           <div className="flex items-center gap-3 mb-8 pb-4 border-b border-amber-100">
             <svg width="38" height="38" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]">
               <circle cx="50" cy="50" r="48" fill="#120f0c" stroke="#f59e0b" strokeWidth="3.5"/>
@@ -455,6 +469,9 @@ export default function HisabApp() {
           </nav>
         </div>
         <div className="pt-4 border-t border-amber-100">
+          <div className="mb-3 text-center text-amber-900/70 text-sm signature-font">
+            Chinmoy Suryakant Band
+          </div>
           <button onClick={handleLock} className="w-full py-2.5 px-4 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer">
             <span>🔒</span> Lock Vault
           </button>
@@ -655,8 +672,18 @@ export default function HisabApp() {
             <div><label className={labelCls}>Address</label><textarea rows={3} value={biz.address} onChange={(e) => setBiz({ ...biz, address: e.target.value })} className={inputCls}></textarea></div>
             <button type="submit" className={primaryBtn}>Surakshit Karein 💾</button>
             {bizSaved && <p className="text-sm text-emerald-600 font-bold text-center">✔ Saved on this device!</p>}
+            
+            {/* Creator Signature in Business Setup Tab */}
+            <div className="pt-4 border-t border-amber-100 text-center text-amber-900/60 text-sm signature-font">
+              Chinmoy Suryakant Band
+            </div>
           </form>
         )}
+
+        {/* Global Footer Signature for Main Content */}
+        <footer className="mt-12 py-4 border-t border-amber-200/60 text-center text-amber-900/60 text-sm signature-font">
+          ArthVed • Designed & Developed by Chinmoy Suryakant Band
+        </footer>
       </main>
 
       {isModalOpen && (
@@ -726,7 +753,7 @@ export default function HisabApp() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={labelCls}>Bank / Account Tag</label>
+                  <label className= {labelCls}>Bank / Account Tag</label>
                   <select value={txData.bankAccount} onChange={(e) => setTxData({ ...txData, bankAccount: e.target.value })} className={inputCls}>
                     {bankAccounts.map(b => (
                       <option key={b.id} value={b.name}>{b.name}</option>
@@ -743,6 +770,9 @@ export default function HisabApp() {
                 <button type="submit" className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all cursor-pointer">Surakshit Karein</button>
               </div>
             </form>
+            <div className="mt-4 pt-3 border-t border-amber-100 text-center text-amber-900/60 text-xs signature-font">
+              Chinmoy Suryakant Band
+            </div>
           </div>
         </div>
       )}
