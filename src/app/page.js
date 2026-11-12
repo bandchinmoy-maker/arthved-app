@@ -7,13 +7,13 @@ const ramayanaSlides = [
   { name: "Mata Sita (माता सीता)", title: "Pavitrata & Tyag ki Moorti", deed: "Rajya ke sabhi sukhon ka tyag karke vanvas mein sahayatri bani, atulya dhairya aur aatma-bal ka sacha parichay diya.", symbol: "🪷", badge: "Grace & Resilience" },
   { name: "Lakshman ji (लक्ष्मण जी)", title: "Bhratruprem & Nishtha", deed: "Bina ek pal soche bade bhai Shri Ram aur bhabhi ke sath vanvas gaye aur din-raat adig pehra dekar lakshman rekha ki maryada rakhi.", symbol: "🛡️", badge: "Eternal Loyalty" },
   { name: "Hanuman ji (हनुमान जी)", title: "Pawanputra & Sankat Mochan", deed: "Samudra langh kar Lanka mein Mata Sita ki khoj ki, Lanka dahan kiya aur Sanjeevani booti laakar lakshman ji ke pran bachaye.", symbol: "🏔️", badge: "Supreme Devotee" },
-  { name: "Jatayu (जटायु)", title: "Param Pakshiraj & Yoddha", deed: "Mata Sita ki raksha ke liye akash mein Ravan se bhayanak yuddh kiya aur dharm के liye apne praan samarpit kiye.", symbol: "🦅", badge: "Brave Protector" },
+  { name: "Jatayu (जटायु)", title: "Param Pakshiraj & Yoddha", deed: "Mata Sita ki raksha ke liye akash mein Ravan se bhayanak yuddh kiya aur dharm ke liye apne praan samarpit kiye.", symbol: "🦅", badge: "Brave Protector" },
   { name: "Sugriva & Angada (सुग्रीव व अंगद)", title: "Kishkindha Leaders", deed: "Shri Ram ke sath sachha mitrata ka vachan nibhaya aur mahan Vanara sena ka netritva karke adharm ka nash kiya.", symbol: "🤝", badge: "Vanara Strength" },
   { name: "Jambavan (जाम्बवान जी)", title: "Riksharaj & Wise Elder", deed: "Apni agya aur gyan se Hanuman ji ko unki alaukik shaktiyon ka smaran karaya aur yuddh mein param margdarshan diya.", symbol: "🐻", badge: "Divine Wisdom" },
   { name: "Nala & Nila (नल और नीलकंठ)", title: "Divine Architects", deed: "Vishwakarma ke aashirwad aur gyan se samudra par mahan 'Ram Setu' ka nirmaan kiya jisse sena Lanka pahunchi.", symbol: "🌉", badge: "Master Engineers" }
 ];
 
-// Comprehensive Global Countries & Currencies List (All World Countries Included)
+// Comprehensive Global Countries & Currencies List (All World Countries Included, Pakistan & Bangladesh Excluded)
 const GLOBAL_COUNTRIES = [
   { country: "India", currency: "INR", symbol: "₹", rateToINR: 1 },
   { country: "Qatar", currency: "QAR", symbol: "QR", rateToINR: 22.80 },
@@ -263,7 +263,6 @@ export default function HisabApp() {
   const [isListening, setIsListening] = useState(false);
   const [detectedSms, setDetectedSms] = useState('');
 
-  // Audio Player States
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 
@@ -381,7 +380,7 @@ export default function HisabApp() {
   };
 
   const downloadCSV = () => {
-    const rows = [['Date', 'Description', 'Category', 'Payment Mode', 'Bank Account', 'Currency', 'Type', 'Amount'], ...transactions.map((t) => [t.date, t.text, t.category, t.paymentMode, t.bankAccount || 'Main Cash Drawer', t.currency || 'INR', t.type, t.amount])];
+    const rows = [['Date', 'Description', 'Category', 'Payment Mode', 'Bank Account', 'Country', 'Currency', 'Type', 'Amount'], ...transactions.map((t) => [t.date, t.text, t.category, t.paymentMode, t.bankAccount || 'Main Cash Drawer', t.country || 'India', t.currency || 'INR', t.type, t.amount])];
     const csv = rows.map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
@@ -470,6 +469,7 @@ export default function HisabApp() {
       id: Date.now(),
       ...txData,
       amount: amountVal,
+      country: countryObj.country,
       currency: countryObj.currency,
       symbol: countryObj.symbol,
       date: new Date().toLocaleDateString()
@@ -623,7 +623,12 @@ export default function HisabApp() {
 
   const txTable = (
     <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6 mb-12">
-      <h2 className="text-xl font-bold text-amber-900 mb-4 flex items-center gap-2"><span>📜</span> Karma Lekha (Transactions)</h2>
+      <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
+        <h2 className="text-xl font-bold text-amber-900 flex items-center gap-2"><span>📜</span> Karma Lekha (Transactions)</h2>
+        <span className="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-lg font-bold">
+          Multi-Currency Secured Ledger 🌐
+        </span>
+      </div>
       {transactions.length === 0 ? (
         <p className="text-sm text-slate-500 py-8 text-center">Abhi tak koi bhi len-den darj nahi kiya gaya hai.</p>
       ) : (
@@ -633,6 +638,7 @@ export default function HisabApp() {
               <tr className="border-b border-amber-100 text-xs text-amber-900 uppercase">
                 <th className="py-3 px-4">Date</th>
                 <th className="py-3 px-4">Vivaran (Description)</th>
+                <th className="py-3 px-4">Country / Currency</th>
                 <th className="py-3 px-4">Category</th>
                 <th className="py-3 px-4">Payment Mode</th>
                 <th className="py-3 px-4">Account Tag</th>
@@ -644,6 +650,11 @@ export default function HisabApp() {
                 <tr key={tx.id} className="hover:bg-amber-50/50">
                   <td className="py-3 px-4 text-slate-500">{tx.date}</td>
                   <td className="py-3 px-4 font-semibold text-slate-800">{tx.text}</td>
+                  <td className="py-3 px-4">
+                    <span className="bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded font-bold">
+                      {tx.country || 'India'} ({tx.currency || 'INR'})
+                    </span>
+                  </td>
                   <td className="py-3 px-4 text-slate-600">{tx.category || 'General'}</td>
                   <td className="py-3 px-4"><span className="bg-amber-100 text-amber-900 text-xs px-2 py-1 rounded-md font-bold">{tx.paymentMode || 'Cash'}</span></td>
                   <td className="py-3 px-4"><span className="bg-slate-100 text-slate-800 text-xs px-2 py-1 rounded-md font-medium">🏦 {tx.bankAccount || 'Main Cash Drawer'}</span></td>
@@ -696,7 +707,6 @@ export default function HisabApp() {
         {/* Music Widget & Live Exchange Rate Ticker */}
         <div className="pt-4 border-t border-amber-100 space-y-3">
           
-          {/* 💱 Live Exchange Rate Ticker */}
           <div className="bg-amber-900 text-amber-100 p-2.5 rounded-xl text-[10px] shadow-inner space-y-1 border border-amber-700">
             <div className="flex items-center justify-between font-bold text-amber-300">
               <span>🌐 Live FX Ticker (vs INR)</span>
@@ -789,6 +799,7 @@ export default function HisabApp() {
               <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Net Balance (Kosh)</p>
                 <h3 className={`text-2xl font-black mt-2 ${netBalance >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>₹ {netBalance.toLocaleString()}</h3>
+                <p className="text-[10px] text-slate-400 mt-1">*Multi-currency native records secured</p>
               </div>
               <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Aagman (Total Income)</p>
@@ -939,7 +950,7 @@ export default function HisabApp() {
         </footer>
       </main>
 
-      {/* Smart Add Transaction Modal with All Global Countries */}
+      {/* Smart Add Transaction Modal with Fixed Overlap & Independent Currency History */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-amber-200 max-h-[90vh] overflow-y-auto">
@@ -980,7 +991,6 @@ export default function HisabApp() {
 
             <form onSubmit={handleAddTransaction} className="space-y-4">
               
-              {/* Comprehensive Country Selection Dropdown */}
               <div>
                 <label className={labelCls}>Select Country (Auto-detects Currency)</label>
                 <select 
@@ -1002,6 +1012,9 @@ export default function HisabApp() {
                     </option>
                   ))}
                 </select>
+                <p className="text-[10px] text-amber-700 mt-1 font-medium">
+                  ℹ️ New entries will be securely saved in {txData.currency || 'INR'} ({txData.symbol || '₹'}). Past history remains intact.
+                </p>
               </div>
 
               <div>
@@ -1014,10 +1027,20 @@ export default function HisabApp() {
                   Amount (in {txData.currency || 'INR'} [{txData.symbol || '₹'}])
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-amber-700 font-bold">
+                  {/* Fixed Overlap with pl-14 padding */}
+                  <span className="absolute left-3 top-2.5 text-amber-800 font-extrabold text-sm select-none">
                     {txData.symbol || '₹'}
                   </span>
-                  <input type="number" required min="0" step="0.01" placeholder="0.00" value={txData.amount} onChange={(e) => setTxData({ ...txData, amount: e.target.value })} className={inputCls + ' pl-8'} />
+                  <input 
+                    type="number" 
+                    required 
+                    min="0" 
+                    step="0.01" 
+                    placeholder="0.00" 
+                    value={txData.amount} 
+                    onChange={(e) => setTxData({ ...txData, amount: e.target.value })} 
+                    className={inputCls + ' pl-14 font-bold text-slate-900'} 
+                  />
                 </div>
               </div>
 
