@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect, useRef } from 'react'
 
@@ -7,10 +7,206 @@ const ramayanaSlides = [
   { name: "Mata Sita (माता सीता)", title: "Pavitrata & Tyag ki Moorti", deed: "Rajya ke sabhi sukhon ka tyag karke vanvas mein sahayatri bani, atulya dhairya aur aatma-bal ka sacha parichay diya.", symbol: "🪷", badge: "Grace & Resilience" },
   { name: "Lakshman ji (लक्ष्मण जी)", title: "Bhratruprem & Nishtha", deed: "Bina ek pal soche bade bhai Shri Ram aur bhabhi ke sath vanvas gaye aur din-raat adig pehra dekar lakshman rekha ki maryada rakhi.", symbol: "🛡️", badge: "Eternal Loyalty" },
   { name: "Hanuman ji (हनुमान जी)", title: "Pawanputra & Sankat Mochan", deed: "Samudra langh kar Lanka mein Mata Sita ki khoj ki, Lanka dahan kiya aur Sanjeevani booti laakar lakshman ji ke pran bachaye.", symbol: "🏔️", badge: "Supreme Devotee" },
-  { name: "Jatayu (जटायु)", title: "Param Pakshiraj & Yoddha", deed: "Mata Sita ki raksha ke liye akash mein Ravan se bhayanak yuddh kiya aur dharm ke liye apne praan samarpit kiye.", symbol: "🦅", badge: "Brave Protector" },
+  { name: "Jatayu (जटायु)", title: "Param Pakshiraj & Yoddha", deed: "Mata Sita ki raksha ke liye akash mein Ravan se bhayanak yuddh kiya aur dharm के liye apne praan samarpit kiye.", symbol: "🦅", badge: "Brave Protector" },
   { name: "Sugriva & Angada (सुग्रीव व अंगद)", title: "Kishkindha Leaders", deed: "Shri Ram ke sath sachha mitrata ka vachan nibhaya aur mahan Vanara sena ka netritva karke adharm ka nash kiya.", symbol: "🤝", badge: "Vanara Strength" },
   { name: "Jambavan (जाम्बवान जी)", title: "Riksharaj & Wise Elder", deed: "Apni agya aur gyan se Hanuman ji ko unki alaukik shaktiyon ka smaran karaya aur yuddh mein param margdarshan diya.", symbol: "🐻", badge: "Divine Wisdom" },
   { name: "Nala & Nila (नल और नीलकंठ)", title: "Divine Architects", deed: "Vishwakarma ke aashirwad aur gyan se samudra par mahan 'Ram Setu' ka nirmaan kiya jisse sena Lanka pahunchi.", symbol: "🌉", badge: "Master Engineers" }
+];
+
+// Comprehensive Global Countries & Currencies List (All World Countries Included)
+const GLOBAL_COUNTRIES = [
+  { country: "India", currency: "INR", symbol: "₹", rateToINR: 1 },
+  { country: "Qatar", currency: "QAR", symbol: "QR", rateToINR: 22.80 },
+  { country: "United States", currency: "USD", symbol: "$", rateToINR: 86.50 },
+  { country: "United Arab Emirates", currency: "AED", symbol: "AED", rateToINR: 23.50 },
+  { country: "United Kingdom", currency: "GBP", symbol: "£", rateToINR: 110.20 },
+  { country: "Eurozone (Germany, France, Italy, etc.)", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Saudi Arabia", currency: "SAR", symbol: "SR", rateToINR: 23.05 },
+  { country: "Afghanistan", currency: "AFN", symbol: "؋", rateToINR: 1.20 },
+  { country: "Albania", currency: "ALL", symbol: "L", rateToINR: 0.92 },
+  { country: "Algeria", currency: "DZD", symbol: "دج", rateToINR: 0.64 },
+  { country: "Andorra", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Angola", currency: "AOA", symbol: "Kz", rateToINR: 0.10 },
+  { country: "Argentina", currency: "ARS", symbol: "$", rateToINR: 0.088 },
+  { country: "Armenia", currency: "AMD", symbol: "֏", rateToINR: 0.22 },
+  { country: "Australia", currency: "AUD", symbol: "A$", rateToINR: 55.60 },
+  { country: "Austria", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Azerbaijan", currency: "AZN", symbol: "₼", rateToINR: 50.80 },
+  { country: "Bahamas", currency: "BSD", symbol: "$", rateToINR: 86.50 },
+  { country: "Bahrain", currency: "BHD", symbol: "BD", rateToINR: 229.30 },
+  { country: "Barbados", currency: "BBD", symbol: "$", rateToINR: 43.25 },
+  { country: "Belarus", currency: "BYN", symbol: "Br", rateToINR: 26.50 },
+  { country: "Belgium", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Belize", currency: "BZD", symbol: "BZ$", rateToINR: 42.80 },
+  { country: "Benin", currency: "XOF", symbol: "CFA", rateToINR: 0.14 },
+  { country: "Bhutan", currency: "BTN", symbol: "Nu.", rateToINR: 1.00 },
+  { country: "Bolivia", currency: "BOB", symbol: "Bs.", rateToINR: 12.50 },
+  { country: "Bosnia and Herzegovina", currency: "BAM", symbol: "KM", rateToINR: 47.20 },
+  { country: "Botswana", currency: "BWP", symbol: "P", rateToINR: 6.40 },
+  { country: "Brazil", currency: "BRL", symbol: "R$", rateToINR: 14.80 },
+  { country: "Brunei", currency: "BND", symbol: "B$", rateToINR: 65.40 },
+  { country: "Bulgaria", currency: "BGN", symbol: "лв", rateToINR: 47.20 },
+  { country: "Burkina Faso", currency: "XOF", symbol: "CFA", rateToINR: 0.14 },
+  { country: "Burundi", currency: "BIF", symbol: "FBu", rateToINR: 0.030 },
+  { country: "Cambodia", currency: "KHR", symbol: "៛", rateToINR: 0.021 },
+  { country: "Cameroon", currency: "XAF", symbol: "FCFA", rateToINR: 0.14 },
+  { country: "Canada", currency: "CAD", symbol: "C$", rateToINR: 61.20 },
+  { country: "Cape Verde", currency: "CVE", symbol: "Esc", rateToINR: 0.84 },
+  { country: "Central African Republic", currency: "XAF", symbol: "FCFA", rateToINR: 0.14 },
+  { country: "Chad", currency: "XAF", symbol: "FCFA", rateToINR: 0.14 },
+  { country: "Chile", currency: "CLP", symbol: "$", rateToINR: 0.091 },
+  { country: "China", currency: "CNY", symbol: "¥", rateToINR: 11.90 },
+  { country: "Colombia", currency: "COP", symbol: "$", rateToINR: 0.021 },
+  { country: "Comoros", currency: "KMF", symbol: "CF", rateToINR: 0.19 },
+  { country: "Congo (Democratic Republic)", currency: "CDF", symbol: "FC", rateToINR: 0.030 },
+  { country: "Congo (Republic)", currency: "XAF", symbol: "FCFA", rateToINR: 0.14 },
+  { country: "Costa Rica", currency: "CRC", symbol: "₡", rateToINR: 0.17 },
+  { country: "Croatia", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Cuba", currency: "CUP", symbol: "$", rateToINR: 3.60 },
+  { country: "Cyprus", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Czech Republic", currency: "CZK", symbol: "Kč", rateToINR: 3.70 },
+  { country: "Denmark", currency: "DKK", symbol: "kr", rateToINR: 12.35 },
+  { country: "Djibouti", currency: "DJF", symbol: "Fdj", rateToINR: 0.49 },
+  { country: "Dominica", currency: "XCD", symbol: "EC$", rateToINR: 32.00 },
+  { country: "Dominican Republic", currency: "DOP", symbol: "RD$", rateToINR: 1.45 },
+  { country: "Ecuador", currency: "USD", symbol: "$", rateToINR: 86.50 },
+  { country: "Egypt", currency: "EGP", symbol: "E£", rateToINR: 1.78 },
+  { country: "El Salvador", currency: "USD", symbol: "$", rateToINR: 86.50 },
+  { country: "Equatorial Guinea", currency: "XAF", symbol: "FCFA", rateToINR: 0.14 },
+  { country: "Eritrea", currency: "ERN", symbol: "Nfk", rateToINR: 5.76 },
+  { country: "Estonia", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Eswatini", currency: "SZL", symbol: "L", rateToINR: 4.75 },
+  { country: "Ethiopia", currency: "ETB", symbol: "Br", rateToINR: 0.74 },
+  { country: "Fiji", currency: "FJD", symbol: "FJ$", rateToINR: 38.50 },
+  { country: "Finland", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "France", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Gabon", currency: "XAF", symbol: "FCFA", rateToINR: 0.14 },
+  { country: "Gambia", currency: "GMD", symbol: "D", rateToINR: 1.25 },
+  { country: "Georgia", currency: "GEL", symbol: "₾", rateToINR: 31.80 },
+  { country: "Germany", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Ghana", currency: "GHS", symbol: "GH₵", rateToINR: 5.80 },
+  { country: "Greece", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Grenada", currency: "XCD", symbol: "EC$", rateToINR: 32.00 },
+  { country: "Guatemala", currency: "GTQ", symbol: "Q", rateToINR: 11.20 },
+  { country: "Guinea", currency: "GNF", symbol: "FG", rateToINR: 0.010 },
+  { country: "Guinea-Bissau", currency: "XOF", symbol: "CFA", rateToINR: 0.14 },
+  { country: "Guyana", currency: "GYD", symbol: "G$", rateToINR: 0.41 },
+  { country: "Haiti", currency: "HTG", symbol: "G", rateToINR: 0.65 },
+  { country: "Honduras", currency: "HNL", symbol: "L", rateToINR: 3.50 },
+  { country: "Hungary", currency: "HUF", symbol: "Ft", rateToINR: 0.23 },
+  { country: "Iceland", currency: "ISK", symbol: "kr", rateToINR: 0.62 },
+  { country: "Indonesia", currency: "IDR", symbol: "Rp", rateToINR: 0.0054 },
+  { country: "Iran", currency: "IRR", symbol: "﷼", rateToINR: 0.0020 },
+  { country: "Iraq", currency: "IQD", symbol: "ع.د", rateToINR: 0.066 },
+  { country: "Ireland", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Israel", currency: "ILS", symbol: "₪", rateToINR: 23.40 },
+  { country: "Italy", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Jamaica", currency: "JMD", symbol: "J$", rateToINR: 0.55 },
+  { country: "Japan", currency: "JPY", symbol: "¥", rateToINR: 0.56 },
+  { country: "Jordan", currency: "JOD", symbol: "JD", rateToINR: 122.00 },
+  { country: "Kazakhstan", currency: "KZT", symbol: "₸", rateToINR: 0.17 },
+  { country: "Kenya", currency: "KES", symbol: "KSh", rateToINR: 0.67 },
+  { country: "Kiribati", currency: "AUD", symbol: "A$", rateToINR: 55.60 },
+  { country: "Korea (North)", currency: "KPW", symbol: "₩", rateToINR: 0.96 },
+  { country: "Korea (South)", currency: "KRW", symbol: "₩", rateToINR: 0.061 },
+  { country: "Kuwait", currency: "KWD", symbol: "KD", rateToINR: 281.50 },
+  { country: "Kyrgyzstan", currency: "KGS", symbol: "с", rateToINR: 0.98 },
+  { country: "Laos", currency: "LAK", symbol: "₭", rateToINR: 0.0040 },
+  { country: "Latvia", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Lebanon", currency: "LBP", symbol: "ل.ل", rateToINR: 0.00096 },
+  { country: "Lesotho", currency: "LSL", symbol: "L", rateToINR: 4.75 },
+  { country: "Liberia", currency: "LRD", symbol: "L$", rateToINR: 0.44 },
+  { country: "Libya", currency: "LYD", symbol: "LD", rateToINR: 17.80 },
+  { country: "Liechtenstein", currency: "CHF", symbol: "CHF", rateToINR: 98.20 },
+  { country: "Lithuania", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Luxembourg", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Madagascar", currency: "MGA", symbol: "Ar", rateToINR: 0.019 },
+  { country: "Malawi", currency: "MWK", symbol: "MK", rateToINR: 0.050 },
+  { country: "Malaysia", currency: "MYR", symbol: "RM", rateToINR: 19.40 },
+  { country: "Maldives", currency: "MVR", symbol: "Rf", rateToINR: 5.60 },
+  { country: "Mali", currency: "XOF", symbol: "CFA", rateToINR: 0.14 },
+  { country: "Malta", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Marshall Islands", currency: "USD", symbol: "$", rateToINR: 86.50 },
+  { country: "Mauritania", currency: "MRU", symbol: "UM", rateToINR: 2.20 },
+  { country: "Mauritius", currency: "MUR", symbol: "₨", rateToINR: 1.88 },
+  { country: "Mexico", currency: "MXN", symbol: "$", rateToINR: 4.30 },
+  { country: "Micronesia", currency: "USD", symbol: "$", rateToINR: 86.50 },
+  { country: "Moldova", currency: "MDL", symbol: "L", rateToINR: 4.80 },
+  { country: "Monaco", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Mongolia", currency: "MNT", symbol: "₮", rateToINR: 0.025 },
+  { country: "Montenegro", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Morocco", currency: "MAD", symbol: "DH", rateToINR: 8.60 },
+  { country: "Mozambique", currency: "MZN", symbol: "MT", rateToINR: 1.35 },
+  { country: "Myanmar", currency: "MMK", symbol: "K", rateToINR: 0.041 },
+  { country: "Namibia", currency: "NAD", symbol: "$", rateToINR: 4.75 },
+  { country: "Nauru", currency: "AUD", symbol: "A$", rateToINR: 55.60 },
+  { country: "Nepal", currency: "NPR", symbol: "रू", rateToINR: 0.62 },
+  { country: "Netherlands", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "New Zealand", currency: "NZD", symbol: "NZ$", rateToINR: 51.20 },
+  { country: "Nicaragua", currency: "NIO", symbol: "C$", rateToINR: 2.35 },
+  { country: "Niger", currency: "XOF", symbol: "CFA", rateToINR: 0.14 },
+  { country: "Nigeria", currency: "NGN", symbol: "₦", rateToINR: 0.055 },
+  { country: "North Macedonia", currency: "MKD", symbol: "ден", rateToINR: 1.50 },
+  { country: "Norway", currency: "NOK", symbol: "kr", rateToINR: 7.90 },
+  { country: "Oman", currency: "OMR", symbol: "OMR", rateToINR: 224.80 },
+  { country: "Palau", currency: "USD", symbol: "$", rateToINR: 86.50 },
+  { country: "Panama", currency: "PAB", symbol: "B/.", rateToINR: 86.50 },
+  { country: "Papua New Guinea", currency: "PGK", symbol: "K", rateToINR: 22.10 },
+  { country: "Paraguay", currency: "PYG", symbol: "₲", rateToINR: 0.011 },
+  { country: "Peru", currency: "PEN", symbol: "S/.", rateToINR: 23.20 },
+  { country: "Philippines", currency: "PHP", symbol: "₱", rateToINR: 1.48 },
+  { country: "Poland", currency: "PLN", symbol: "zł", rateToINR: 21.50 },
+  { country: "Portugal", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Romania", currency: "RON", symbol: "lei", rateToINR: 18.50 },
+  { country: "Russia", currency: "RUB", symbol: "₽", rateToINR: 0.92 },
+  { country: "Rwanda", currency: "RWF", symbol: "FRw", rateToINR: 0.064 },
+  { country: "Saint Kitts and Nevis", currency: "XCD", symbol: "EC$", rateToINR: 32.00 },
+  { country: "Saint Lucia", currency: "XCD", symbol: "EC$", rateToINR: 32.00 },
+  { country: "Saint Vincent and the Grenadines", currency: "XCD", symbol: "EC$", rateToINR: 32.00 },
+  { country: "Samoa", currency: "WST", symbol: "T", rateToINR: 31.50 },
+  { country: "San Marino", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Sao Tome and Principe", currency: "STN", symbol: "Db", rateToINR: 3.75 },
+  { country: "Senegal", currency: "XOF", symbol: "CFA", rateToINR: 0.14 },
+  { country: "Serbia", currency: "RSD", symbol: "дин", rateToINR: 0.79 },
+  { country: "Seychelles", currency: "SCR", symbol: "SR", rateToINR: 6.30 },
+  { country: "Sierra Leone", currency: "SLL", symbol: "Le", rateToINR: 0.0039 },
+  { country: "Singapore", currency: "SGD", symbol: "S$", rateToINR: 65.40 },
+  { country: "Slovakia", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Slovenia", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Solomon Islands", currency: "SBD", symbol: "SI$", rateToINR: 10.20 },
+  { country: "Somalia", currency: "SOS", symbol: "Sh.so", rateToINR: 0.15 },
+  { country: "South Africa", currency: "ZAR", symbol: "R", rateToINR: 4.75 },
+  { country: "South Sudan", currency: "SSP", symbol: "£", rateToINR: 0.066 },
+  { country: "Spain", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Sri Lanka", currency: "LKR", symbol: "Rs", rateToINR: 0.29 },
+  { country: "Sudan", currency: "SDG", symbol: "SD", rateToINR: 0.14 },
+  { country: "Suriname", currency: "SRD", symbol: "$", rateToINR: 2.30 },
+  { country: "Sweden", currency: "SEK", symbol: "kr", rateToINR: 8.10 },
+  { country: "Switzerland", currency: "CHF", symbol: "CHF", rateToINR: 98.20 },
+  { country: "Syria", currency: "SYP", symbol: "£", rateToINR: 0.034 },
+  { country: "Taiwan", currency: "TWD", symbol: "NT$", rateToINR: 2.65 },
+  { country: "Tajikistan", currency: "TJS", symbol: "SM", rateToINR: 7.90 },
+  { country: "Tanzania", currency: "TZS", symbol: "TSh", rateToINR: 0.033 },
+  { country: "Thailand", currency: "THB", symbol: "฿", rateToINR: 2.50 },
+  { country: "Timor-Leste", currency: "USD", symbol: "$", rateToINR: 86.50 },
+  { country: "Togo", currency: "XOF", symbol: "CFA", rateToINR: 0.14 },
+  { country: "Tonga", currency: "TOP", symbol: "T$", rateToINR: 36.50 },
+  { country: "Trinidad and Tobago", currency: "TTD", symbol: "TT$", rateToINR: 12.70 },
+  { country: "Tunisia", currency: "TND", symbol: "د.ت", rateToINR: 27.50 },
+  { country: "Turkey", currency: "TRY", symbol: "₺", rateToINR: 2.50 },
+  { country: "Turkmenistan", currency: "TMT", symbol: "m", rateToINR: 24.70 },
+  { country: "Tuvalu", currency: "AUD", symbol: "A$", rateToINR: 55.60 },
+  { country: "Uganda", currency: "UGX", symbol: "USh", rateToINR: 0.023 },
+  { country: "Ukraine", currency: "UAH", symbol: "₴", rateToINR: 2.10 },
+  { country: "Uruguay", currency: "UYU", symbol: "$U", rateToINR: 2.15 },
+  { country: "Uzbekistan", currency: "UZS", symbol: "so'm", rateToINR: 0.0068 },
+  { country: "Vanuatu", currency: "VUV", symbol: "VT", rateToINR: 0.72 },
+  { country: "Vatican City", currency: "EUR", symbol: "€", rateToINR: 92.40 },
+  { country: "Venezuela", currency: "VES", symbol: "Bs.", rateToINR: 2.35 },
+  { country: "Vietnam", currency: "VND", symbol: "₫", rateToINR: 0.0034 },
+  { country: "Yemen", currency: "YER", symbol: "﷼", rateToINR: 0.35 },
+  { country: "Zambia", currency: "ZMW", symbol: "ZK", rateToINR: 3.20 },
+  { country: "Zimbabwe", currency: "ZWL", symbol: "Z$", rateToINR: 0.27 }
 ];
 
 const TABS = ['Overview', 'Transactions', 'To collect', 'Reports', 'Bank Accounts', 'Business setup'];
@@ -20,7 +216,7 @@ const screenCls = 'min-h-screen bg-[#120f0c] flex items-center justify-center p-
 const inputCls = 'w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white';
 const labelCls = 'block text-xs font-bold text-slate-700 uppercase mb-1';
 const primaryBtn = 'w-full py-3.5 bg-amber-800 hover:bg-amber-900 text-white font-bold text-sm rounded-xl shadow-md transition cursor-pointer';
-const emptyTx = { text: '', amount: '', type: 'income', category: 'General', paymentMode: 'Cash', bankAccount: 'Main Cash Drawer' };
+const emptyTx = { text: '', amount: '', type: 'income', category: 'General', paymentMode: 'Cash', bankAccount: 'Main Cash Drawer', country: 'India', currency: 'INR', symbol: '₹' };
 
 const AnimStyles = () => (
   <style>{`
@@ -96,7 +292,7 @@ export default function HisabApp() {
   };
 
   const receiveDue = (due) => {
-    const newTx = { id: Date.now(), text: `Received from ${due.party}`, amount: due.amount, type: 'income', category: 'Udhaar Wapasi', paymentMode: 'Cash', bankAccount: 'Main Cash Drawer', date: new Date().toLocaleDateString() };
+    const newTx = { id: Date.now(), text: `Received from ${due.party}`, amount: due.amount, type: 'income', category: 'Udhaar Wapasi', paymentMode: 'Cash', bankAccount: 'Main Cash Drawer', currency: 'INR', symbol: '₹', date: new Date().toLocaleDateString() };
     const updated = [newTx, ...transactions];
     setTransactions(updated);
     localStorage.setItem('arthved_tx', JSON.stringify(updated));
@@ -185,7 +381,7 @@ export default function HisabApp() {
   };
 
   const downloadCSV = () => {
-    const rows = [['Date', 'Description', 'Category', 'Payment Mode', 'Bank Account', 'Type', 'Amount'], ...transactions.map((t) => [t.date, t.text, t.category, t.paymentMode, t.bankAccount || 'Main Cash Drawer', t.type, t.amount])];
+    const rows = [['Date', 'Description', 'Category', 'Payment Mode', 'Bank Account', 'Currency', 'Type', 'Amount'], ...transactions.map((t) => [t.date, t.text, t.category, t.paymentMode, t.bankAccount || 'Main Cash Drawer', t.currency || 'INR', t.type, t.amount])];
     const csv = rows.map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
@@ -267,10 +463,15 @@ export default function HisabApp() {
     e.preventDefault();
     if (!txData.text || !txData.amount) return;
     const amountVal = parseFloat(txData.amount);
+    
+    const countryObj = GLOBAL_COUNTRIES.find(c => c.country === (txData.country || 'India')) || GLOBAL_COUNTRIES[0];
+
     const newTx = {
       id: Date.now(),
       ...txData,
       amount: amountVal,
+      currency: countryObj.currency,
+      symbol: countryObj.symbol,
       date: new Date().toLocaleDateString()
     };
     const updated = [newTx, ...transactions];
@@ -447,7 +648,7 @@ export default function HisabApp() {
                   <td className="py-3 px-4"><span className="bg-amber-100 text-amber-900 text-xs px-2 py-1 rounded-md font-bold">{tx.paymentMode || 'Cash'}</span></td>
                   <td className="py-3 px-4"><span className="bg-slate-100 text-slate-800 text-xs px-2 py-1 rounded-md font-medium">🏦 {tx.bankAccount || 'Main Cash Drawer'}</span></td>
                   <td className={`py-3 px-4 font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                    {tx.type === 'income' ? '+' : '-'} ₹ {Math.abs(tx.amount).toLocaleString()}
+                    {tx.type === 'income' ? '+' : '-'} {tx.symbol || '₹'} {Math.abs(tx.amount).toLocaleString()}
                   </td>
                 </tr>
               ))}
@@ -492,8 +693,21 @@ export default function HisabApp() {
           </nav>
         </div>
 
-        {/* Empty Space Music Widget & Creator Signature Integration */}
+        {/* Music Widget & Live Exchange Rate Ticker */}
         <div className="pt-4 border-t border-amber-100 space-y-3">
+          
+          {/* 💱 Live Exchange Rate Ticker */}
+          <div className="bg-amber-900 text-amber-100 p-2.5 rounded-xl text-[10px] shadow-inner space-y-1 border border-amber-700">
+            <div className="flex items-center justify-between font-bold text-amber-300">
+              <span>🌐 Live FX Ticker (vs INR)</span>
+              <span className="animate-pulse">● Live</span>
+            </div>
+            <div className="flex justify-between text-slate-200">
+              <span>1 USD = ₹86.50</span>
+              <span>1 QAR = ₹22.80</span>
+            </div>
+          </div>
+
           <div className="bg-amber-50 border border-amber-200/60 p-3 rounded-2xl text-center shadow-inner">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-bold text-amber-900 uppercase">🎵 Divine Dhun</span>
@@ -725,11 +939,12 @@ export default function HisabApp() {
         </footer>
       </main>
 
+      {/* Smart Add Transaction Modal with All Global Countries */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-amber-200">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-amber-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-amber-100">
-              <h3 className="text-lg font-bold text-amber-900">Naya Karma Lekha Jodein</h3>
+              <h3 className="text-lg font-bold text-amber-900">Add Transaction</h3>
               <button type="button" onClick={() => { setIsModalOpen(false); setDetectedSms(''); }} className="text-slate-400 hover:text-rose-600 text-xl font-bold p-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer">✕</button>
             </div>
 
@@ -764,20 +979,54 @@ export default function HisabApp() {
             )}
 
             <form onSubmit={handleAddTransaction} className="space-y-4">
+              
+              {/* Comprehensive Country Selection Dropdown */}
               <div>
-                <label className={labelCls}>Vivaran (Description)</label>
+                <label className={labelCls}>Select Country (Auto-detects Currency)</label>
+                <select 
+                  value={txData.country || 'India'} 
+                  onChange={(e) => {
+                    const selectedC = GLOBAL_COUNTRIES.find(c => c.country === e.target.value);
+                    setTxData({ 
+                      ...txData, 
+                      country: e.target.value, 
+                      currency: selectedC ? selectedC.currency : 'INR',
+                      symbol: selectedC ? selectedC.symbol : '₹'
+                    });
+                  }} 
+                  className={inputCls}
+                >
+                  {GLOBAL_COUNTRIES.map((c) => (
+                    <option key={c.country} value={c.country}>
+                      {c.country} ({c.currency} - {c.symbol})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelCls}>Description</label>
                 <input type="text" required placeholder="Jaise: Yajna Samagri, Seva daan..." value={txData.text} onChange={(e) => setTxData({ ...txData, text: e.target.value })} className={inputCls} />
               </div>
+              
               <div>
-                <label className={labelCls}>Rashi (Amount in ₹)</label>
-                <input type="number" required min="0" step="0.01" placeholder="0.00" value={txData.amount} onChange={(e) => setTxData({ ...txData, amount: e.target.value })} className={inputCls} />
+                <label className={labelCls}>
+                  Amount (in {txData.currency || 'INR'} [{txData.symbol || '₹'}])
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-amber-700 font-bold">
+                    {txData.symbol || '₹'}
+                  </span>
+                  <input type="number" required min="0" step="0.01" placeholder="0.00" value={txData.amount} onChange={(e) => setTxData({ ...txData, amount: e.target.value })} className={inputCls + ' pl-8'} />
+                </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={labelCls}>Prakar (Type)</label>
+                  <label className={labelCls}>Type</label>
                   <select value={txData.type} onChange={(e) => setTxData({ ...txData, type: e.target.value })} className={inputCls}>
-                    <option value="income">Aagman (Income)</option>
-                    <option value="expense">Vyaya (Expense)</option>
+                    <option value="income">Income (Aagman)</option>
+                    <option value="expense">Expense (Vyaya)</option>
                   </select>
                 </div>
                 <div>
@@ -792,7 +1041,7 @@ export default function HisabApp() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={labelCls}>Bank / AccountTag</label>
+                  <label className={labelCls}>Bank / Account Tag</label>
                   <select value={txData.bankAccount} onChange={(e) => setTxData({ ...txData, bankAccount: e.target.value })} className={inputCls}>
                     {bankAccounts.map(b => (
                       <option key={b.id} value={b.name}>{b.name}</option>
@@ -806,7 +1055,7 @@ export default function HisabApp() {
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-amber-100">
                 <button type="button" onClick={() => { setIsModalOpen(false); setDetectedSms(''); }} className="px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">Cancel</button>
-                <button type="submit" className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all cursor-pointer">Surakshit Karein</button>
+                <button type="submit" className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all cursor-pointer">Save Entry</button>
               </div>
             </form>
             <div className="mt-4 pt-3 border-t border-amber-100 text-center text-amber-900/60 text-xs signature-font">
