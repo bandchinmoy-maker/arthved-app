@@ -8,12 +8,14 @@ const ramayanaSlides = [
   { name: "Mata Sita (माता सीता)", title: "Pavitrata & Tyag ki Moorti", deed: "Rajya ke sabhi sukhon ka tyag karke vanvas mein sahayatri bani, atulya dhairya aur aatma-bal ka sacha parichay diya.", symbol: "🪷", badge: "Grace & Resilience" },
   { name: "Lakshman ji (लक्ष्मण जी)", title: "Bhratruprem & Nishtha", deed: "Bina ek pal soche bade bhai Shri Ram aur bhabhi ke sath vanvas gaye aur din-raat adig pehra dekar lakshman rekha ki maryada rakhi.", symbol: "🛡️", badge: "Eternal Loyalty" },
   { name: "Hanuman ji (हनुमान जी)", title: "Pawanputra & Sankat Mochan", deed: "Samudra langh kar Lanka mein Mata Sita ki khoj ki, Lanka dahan kiya aur Sanjeevani booti laakar lakshman ji ke pran bachaye.", symbol: "🏔️", badge: "Supreme Devotee" },
-  { name: "Jatayu (जटायु)", title: "Param Pakshiraj & Yoddha", deed: "Mata Sita ki raksha ke liye akash mein Ravan se bhayanak yuddh kiya aur dharm کے liye apne praan samarpit kiye.", symbol: "🦅", badge: "Brave Protector" },
+  { name: "Jatayu (जटायु)", title: "Param Pakshiraj & Yoddha", deed: "Mata Sita ki raksha ke liye akash mein Ravan se bhayanak yuddh kiya aur dharm ke liye apne praan samarpit kiye.", symbol: "🦅", badge: "Brave Protector" },
   { name: "Sugriva & Angada (सुग्रीव व अंगद)", title: "Kishkindha Leaders", deed: "Shri Ram ke sath sachha mitrata ka vachan nibhaya aur mahan Vanara sena ka netritva karke adharm ka nash kiya.", symbol: "🤝", badge: "Vanara Strength" },
   { name: "Jambavan (जाम्बवान जी)", title: "Riksharaj & Wise Elder", deed: "Apni agya aur gyan se Hanuman ji ko unki alaukik shaktiyon ka smaran karaya aur yuddh mein param margdarshan diya.", symbol: "🐻", badge: "Divine Wisdom" },
   { name: "Nala & Nila (नल और नीलकंठ)", title: "Divine Architects", deed: "Vishwakarma ke aashirwad aur gyan se samudra par mahan 'Ram Setu' ka nirmaan kiya jisse sena Lanka pahunchi.", symbol: "🌉", badge: "Master Engineers" }
 ];
 
+// Country list: [country, currency code, symbol, approximate rate to INR].
+// NOTE: rates are typed in by hand and are only approximate.
 const COUNTRY_ROWS = [
   ["India", "INR", "₹", 1], ["Qatar", "QAR", "QR", 22.80], ["United States", "USD", "$", 86.50],
   ["United Arab Emirates", "AED", "AED", 23.50], ["United Kingdom", "GBP", "£", 110.20],
@@ -93,13 +95,25 @@ const labelCls = 'block text-xs font-bold text-slate-700 uppercase mb-1';
 const primaryBtn = 'w-full py-3.5 bg-amber-800 hover:bg-amber-900 text-white font-bold text-sm rounded-xl shadow-md transition cursor-pointer';
 const emptyTx = { text: '', amount: '', type: 'income', category: 'General', paymentMode: 'Cash', bankAccount: 'Main Cash Drawer', country: 'India', currency: 'INR', symbol: '₹' };
 
+// Amount of a transaction in rupees (old entries without amountINR are treated as rupees)
 const inr = (t) => t.amountINR ?? t.amount;
 
-const monthKey = (t) => { 
-  const dateVal = t.createdAt || t.date || Date.now();
-  const d = new Date(dateVal); 
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; 
-};
+// Turns any saved entry (old browser data or backup file) into what the database expects
+const toPayload = (t) => ({
+  text: String(t.text || ''),
+  amount: Number(t.amount) || 0,
+  amountINR: Number(inr(t)) || 0,
+  type: t.type === 'expense' ? 'expense' : 'income',
+  category: t.category || 'General',
+  paymentMode: t.paymentMode || 'Cash',
+  bankAccount: t.bankAccount || 'Main Cash Drawer',
+  country: t.country || 'India',
+  currency: t.currency || 'INR',
+  symbol: t.symbol || '₹',
+  date: t.date || new Date().toLocaleDateString()
+});
+
+const monthKey = (t) => { const d = new Date(t.createdAt || Date.now()); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; };
 const monthLabel = (k) => { const [y, m] = k.split('-'); return new Date(+y, +m - 1, 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' }); };
 
 const AnimStyles = () => (
@@ -150,12 +164,28 @@ export default function HisabApp() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 
+  // Live exchange rates (units of each currency per 1 INR). Falls back to the typed-in rates if offline.
   const [liveRates, setLiveRates] = useState(null);
   const [ratesDate, setRatesDate] = useState('');
   const [editingId, setEditingId] = useState(null);
+  const [dbStatus, setDbStatus] = useState('loading');
+  const [oldLocalCount, setOldLocalCount] = useState(0);
+  const [saving, setSaving] = useState(false);
   const [monthFilter, setMonthFilter] = useState('all');
   const [search, setSearch] = useState('');
   const getRate = (c) => (liveRates && liveRates[c.currency] ? 1 / liveRates[c.currency] : c.rateToINR);
+
+  // Reload all transactions from the database and remember if it worked
+  const refreshTx = async () => {
+    try {
+      const res = await getTransactions();
+      if (res.success) { setTransactions(res.data); setDbStatus('ok'); return true; }
+    } catch (err) {
+      console.error('Could not load transactions', err);
+    }
+    setDbStatus('error');
+    return false;
+  };
 
   const toggleMusic = () => {
     if (!audioRef.current) return;
@@ -182,41 +212,62 @@ export default function HisabApp() {
   };
 
   const receiveDue = async (due) => {
-    const payload = {
-      text: `Received from ${due.party}`,
-      amount: due.amount,
-      amountINR: due.amount,
-      type: 'income',
-      category: 'Udhaar Wapasi',
-      paymentMode: 'Cash',
-      bankAccount: bankAccounts[0]?.name || 'Main Cash Drawer',
-      country: 'India',
-      currency: 'INR',
-      symbol: '₹',
-      date: new Date().toLocaleDateString()
-    };
-    const res = await saveTransaction(payload);
-    if (res.success) {
-      const dbRes = await getTransactions();
-      if (dbRes.success) setTransactions(dbRes.data);
+    try {
+      const res = await saveTransaction({
+        text: `Received from ${due.party}`,
+        amount: due.amount,
+        amountINR: due.amount,
+        type: 'income',
+        category: 'Udhaar Wapasi',
+        paymentMode: 'Cash',
+        bankAccount: bankAccounts[0]?.name || 'Main Cash Drawer',
+        country: 'India',
+        currency: 'INR',
+        symbol: '₹',
+        date: new Date().toLocaleDateString()
+      });
+      if (!res.success) throw new Error(res.error);
+      saveDues(dues.filter((d) => d.id !== due.id));
+      await refreshTx();
+    } catch (err) {
+      console.error(err);
+      alert('Could not save to the database. The entry was NOT removed from To collect. Please try again.');
     }
-    saveDues(dues.filter((d) => d.id !== due.id));
   };
 
   const deleteDue = (id) => saveDues(dues.filter((d) => d.id !== id));
 
   const deleteTx = async (id) => {
-    if (window.confirm('Delete this entry from Neon Database? This cannot be undone.')) {
+    if (!window.confirm('Delete this entry? This cannot be undone.')) return;
+    try {
       const res = await deleteTxServer(id);
-      if (res.success) {
-        const dbRes = await getTransactions();
-        if (dbRes.success) setTransactions(dbRes.data);
-      } else {
-        alert('Delete failed');
-      }
+      if (!res.success) throw new Error(res.error);
+      await refreshTx();
+    } catch (err) {
+      console.error(err);
+      alert('Could not delete. Please try again.');
     }
   };
 
+  // Move entries saved in this browser (old version of the app) into the database
+  const importOldLocal = async () => {
+    try {
+      const old = JSON.parse(localStorage.getItem('arthved_tx') || '[]');
+      if (!old.length) return;
+      if (!window.confirm(`Move ${old.length} old entries from this browser to the database?`)) return;
+      let failed = 0;
+      for (const t of [...old].reverse()) {
+        const res = await saveTransaction(toPayload(t));
+        if (!res.success) failed++;
+      }
+      if (failed === 0) { localStorage.removeItem('arthved_tx'); setOldLocalCount(0); }
+      await refreshTx();
+      alert(failed === 0 ? 'All old entries moved to the database ✔' : `${failed} entries failed. Nothing was removed from this browser, so you can try again (entries that did move may appear twice).`);
+    } catch (err) {
+      console.error(err);
+      alert('Could not move the old data. Please try again.');
+    }
+  };
   const openAdd = () => { setEditingId(null); setIsModalOpen(true); };
   const openEdit = (tx) => {
     setEditingId(tx.id);
@@ -232,26 +283,32 @@ export default function HisabApp() {
     a.download = `arthved-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
   };
-
   const restoreBackup = (e) => {
     const file = e.target.files && e.target.files[0];
+    e.target.value = '';
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
         const d = JSON.parse(reader.result);
         if (d.app !== 'arthved' || !Array.isArray(d.transactions)) throw new Error('bad file');
-        if (!window.confirm('This will REPLACE local data with backup. Continue?')) return;
+        if (!window.confirm(`Add ${d.transactions.length} transactions from this backup to the database? Existing transactions stay (restoring the same file twice creates copies). Dues, bank accounts and business info on this device will be replaced.`)) return;
+        let failed = 0;
+        for (const t of [...d.transactions].reverse()) {
+          const res = await saveTransaction(toPayload(t));
+          if (!res.success) failed++;
+        }
         saveDues(Array.isArray(d.dues) ? d.dues : []);
         if (Array.isArray(d.bankAccounts) && d.bankAccounts.length) { setBankAccounts(d.bankAccounts); localStorage.setItem('arthved_banks', JSON.stringify(d.bankAccounts)); }
         if (d.biz) { setBiz(d.biz); localStorage.setItem('arthved_biz', JSON.stringify(d.biz)); }
-        alert('Backup restored ✔');
+        await refreshTx();
+        alert(failed === 0 ? 'Backup restored ✔' : `Backup restored, but ${failed} transactions could not be saved.`);
       } catch (err) {
-        alert('This is not a valid ArthVed backup file.');
+        console.error(err);
+        alert('This is not a valid ArthVed backup file, or the database could not be reached.');
       }
     };
     reader.readAsText(file);
-    e.target.value = '';
   };
 
   const saveBiz = (e) => {
@@ -293,6 +350,7 @@ export default function HisabApp() {
       const amount = numberMatch ? numberMatch[0].replace(/,/g, '') : '';
       const text = transcript.replace(/\d[\d,]*(?:\.\d+)?/g, '').trim();
       const lower = transcript.toLowerCase();
+      // Works for both English-letter and Devanagari speech results
       const isExpense = ['kharcha', 'kharch', 'paid', 'diya', 'खर्च', 'खर्चा', 'दिया', 'दिए'].some((w) => lower.includes(w));
 
       setTxData(prev => ({
@@ -316,6 +374,7 @@ export default function HisabApp() {
         alert("Clipboard is empty.");
         return;
       }
+      // Reads amounts like "Rs 1,500.00", "INR 250", "₹99"
       const numMatch = text.match(/(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d+)?)/i);
       const amount = numMatch ? numMatch[1].replace(/,/g, '') : '';
       const lower = text.toLowerCase();
@@ -339,6 +398,7 @@ export default function HisabApp() {
     const rows = [['Date', 'Description', 'Category', 'Payment Mode', 'Bank Account', 'Country', 'Currency', 'Type', 'Amount', 'Amount in INR'], ...transactions.map((t) => [t.date, t.text, t.category, t.paymentMode, t.bankAccount || 'Main Cash Drawer', t.country || 'India', t.currency || 'INR', t.type, t.amount, inr(t)])];
     const csv = rows.map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const a = document.createElement('a');
+    // The \uFEFF makes Hindi text show correctly in Excel
     a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' }));
     a.download = 'arthved-report.csv';
     a.click();
@@ -354,6 +414,7 @@ export default function HisabApp() {
   const byCategory = Object.entries(viewTx.filter((t) => t.type === 'expense').reduce((m, t) => { const k = t.category || 'General'; m[k] = (m[k] || 0) + inr(t); return m; }, {})).sort((a, b) => b[1] - a[1]);
   const byMode = Object.entries(viewTx.reduce((m, t) => { const k = t.paymentMode || 'Cash'; m[k] = (m[k] || 0) + inr(t); return m; }, {}));
 
+  // Fetch daily exchange rates (cached for 12 hours)
   useEffect(() => {
     const loadRates = async () => {
       try {
@@ -372,12 +433,13 @@ export default function HisabApp() {
           setRatesDate(updated);
         }
       } catch (err) {
-        console.error('Could not load exchange rates', err);
+        console.error('Could not load exchange rates, using saved approximate rates', err);
       }
     };
     loadRates();
   }, []);
 
+  // Music player lives here so it keeps playing when the screen changes
   useEffect(() => {
     const a = new Audio('/music.mp3');
     a.loop = true;
@@ -386,15 +448,13 @@ export default function HisabApp() {
   }, []);
 
   useEffect(() => {
-    const fetchDbTx = async () => {
-      const res = await getTransactions();
-      if (res.success) {
-        setTransactions(res.data);
-      }
-    };
-    fetchDbTx();
-
+    refreshTx();
     const timer = setTimeout(() => {
+      try {
+        setOldLocalCount(JSON.parse(localStorage.getItem('arthved_tx') || '[]').length);
+      } catch (err) {
+        console.error('Could not read old browser entries', err);
+      }
       try {
         const savedDues = localStorage.getItem('arthved_dues');
         if (savedDues) setDues(JSON.parse(savedDues));
@@ -403,7 +463,7 @@ export default function HisabApp() {
         const savedBanks = localStorage.getItem('arthved_banks');
         if (savedBanks) setBankAccounts(JSON.parse(savedBanks));
       } catch (err) {
-        console.error('Could not read local data', err);
+        console.error('Could not read saved data', err);
       }
       setStep(localStorage.getItem('arthved_user') ? 'login' : 'welcome');
     }, 2600);
@@ -454,46 +514,50 @@ export default function HisabApp() {
 
   const handleAddTransaction = async (e) => {
     e.preventDefault();
-    if (!txData.text || !txData.amount) return;
+    if (saving || !txData.text || !txData.amount) return;
     const amountVal = parseFloat(txData.amount);
     const countryObj = GLOBAL_COUNTRIES.find(c => c.country === (txData.country || 'India')) || GLOBAL_COUNTRIES[0];
     const old = editingId ? transactions.find((t) => t.id === editingId) : null;
+    // If amount and currency are unchanged, keep the rupee value from the original day
     const unchanged = old && old.amount === amountVal && (old.currency || 'INR') === countryObj.currency;
     const amountINR = unchanged ? inr(old) : Math.round(amountVal * getRate(countryObj) * 100) / 100;
     const bankAccount = bankAccounts.some(b => b.name === txData.bankAccount) ? txData.bankAccount : (bankAccounts[0]?.name || 'Main Cash Drawer');
 
-    if (txData.paymentMode === 'Credit Sales') {
-      saveDues([{ id: Date.now(), party: txData.text, amount: amountINR, dueDate: '' }, ...dues]);
-      if (old) await deleteTxServer(old.id);
-    } else {
-      const payload = {
-        id: old ? old.id : undefined,
-        text: txData.text,
-        amount: amountVal,
-        amountINR,
-        type: txData.type,
-        category: txData.category || 'General',
-        paymentMode: txData.paymentMode || 'Cash',
-        bankAccount,
-        country: countryObj.country,
-        currency: countryObj.currency,
-        symbol: countryObj.symbol,
-        date: old ? old.date : new Date().toLocaleDateString()
-      };
-      const res = await saveTransaction(payload);
-      if (!res.success) {
-        alert('Failed to save to database');
-        return;
+    setSaving(true);
+    try {
+      if (txData.paymentMode === 'Credit Sales') {
+        // A credit sale is not income yet. It goes to "To collect" and becomes income when you press "Mila".
+        saveDues([{ id: Date.now(), party: txData.text, amount: amountINR, dueDate: '' }, ...dues]);
+        if (old) await deleteTxServer(old.id);
+      } else {
+        const res = await saveTransaction({
+          id: old ? old.id : undefined,
+          text: txData.text,
+          amount: amountVal,
+          amountINR,
+          type: txData.type,
+          category: txData.category || 'General',
+          paymentMode: txData.paymentMode || 'Cash',
+          bankAccount,
+          country: countryObj.country,
+          currency: countryObj.currency,
+          symbol: countryObj.symbol,
+          date: old ? old.date : new Date().toLocaleDateString()
+        });
+        if (!res.success) throw new Error(res.error);
       }
+      await refreshTx();
+      setIsModalOpen(false);
+      setEditingId(null);
+      // Keep the chosen country for the next entry
+      setTxData({ ...emptyTx, country: countryObj.country, currency: countryObj.currency, symbol: countryObj.symbol });
+      setDetectedSms('');
+    } catch (err) {
+      console.error(err);
+      alert('Could not save to the database. Please check your internet and try again. Nothing was lost: your form is still open.');
+    } finally {
+      setSaving(false);
     }
-
-    const dbRes = await getTransactions();
-    if (dbRes.success) setTransactions(dbRes.data);
-
-    setIsModalOpen(false);
-    setEditingId(null);
-    setTxData({ ...emptyTx, country: countryObj.country, currency: countryObj.currency, symbol: countryObj.symbol });
-    setDetectedSms('');
   };
 
   const totalIncome = viewTx.filter(t => t.type === 'income').reduce((a, c) => a + inr(c), 0);
@@ -522,9 +586,9 @@ export default function HisabApp() {
             <span key={i} className="av-letter" style={{ animationDelay: `${i * 0.12}s, 0s` }}>{ch}</span>
           ))}
         </h1>
-        <p className="av-fade text-xs text-amber-200/60 mt-3 font-medium tracking-wider uppercase">Financial Science & Vision • Ayodhya Edition (Neon DB)</p>
+        <p className="av-fade text-xs text-amber-200/60 mt-3 font-medium tracking-wider uppercase">Financial Science & Vision • Ayodhya Edition</p>
         <div className="absolute bottom-6 text-amber-300/80 text-sm signature-font tracking-wide">
-          Chinmoy Suryakant Band
+          Crafted by Chinmoy Suryakant Band
         </div>
       </div>
     );
@@ -545,7 +609,7 @@ export default function HisabApp() {
             </svg>
           </div>
           <h2 className="text-2xl font-black text-slate-900 mb-1">Welcome to ArthVed</h2>
-          <p className="text-xs text-slate-500 mb-6">Surya ki urja, Nayan ki drishti — har hisab ekdam saaf (Cloud Synced).</p>
+          <p className="text-xs text-slate-500 mb-6">Surya ki urja, Nayan ki drishti — har hisab ekdam saaf.</p>
           <div className="space-y-3">
             <button onClick={() => setStep('register')} className={primaryBtn}>✨ New User (Register Vault)</button>
             <button onClick={() => setStep('login')} className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm rounded-xl transition cursor-pointer">🔑 Old User (Unlock Vault)</button>
@@ -608,7 +672,7 @@ export default function HisabApp() {
           {pinError && <p className="text-xs text-rose-500 mb-4 font-medium">Wrong PIN! Please try again.</p>}
           <button onClick={handleLogin} className={primaryBtn}>Unlock Dashboard 🔓</button>
           <button
-            onClick={() => { if (window.confirm('This will delete your account on this device. Continue?')) handleResetVault(); }}
+            onClick={() => { if (window.confirm('This removes your PIN and your dues, bank accounts and business info from this device. Your transactions in the database are NOT deleted. Continue?')) handleResetVault(); }}
             className="mt-4 text-xs text-slate-400 hover:underline block mx-auto font-medium"
           >
             Reset Vault / Register New Account
@@ -626,9 +690,9 @@ export default function HisabApp() {
   const txTable = (
     <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6 mb-12">
       <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
-        <h2 className="text-xl font-bold text-amber-900 flex items-center gap-2"><span>📜</span> Karma Lekha (Cloud DB Transactions)</h2>
-        <span className="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-lg font-bold">
-          Neon Postgres Synced 🟢
+        <h2 className="text-xl font-bold text-amber-900 flex items-center gap-2"><span>📜</span> Karma Lekha (Transactions)</h2>
+        <span className={`text-xs px-3 py-1 rounded-lg font-bold ${dbStatus === 'ok' ? 'bg-emerald-100 text-emerald-800' : dbStatus === 'error' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-600'}`}>
+          {dbStatus === 'ok' ? 'Cloud database connected 🟢' : dbStatus === 'error' ? 'Database not reachable 🔴' : 'Connecting…'}
         </span>
       </div>
       {tableTx.length === 0 ? (
@@ -774,6 +838,12 @@ export default function HisabApp() {
           ))}
         </div>
 
+        {dbStatus === 'error' && (
+          <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-800 text-sm font-bold rounded-xl p-3">
+            ⚠️ Cannot reach the database. Your transactions may not be showing. Check your internet and refresh the page.
+          </div>
+        )}
+
         {['Overview', 'Transactions', 'Reports'].includes(activeTab) && (
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)} className={inputCls} style={{ width: 'auto' }}>
@@ -846,7 +916,8 @@ export default function HisabApp() {
               <button type="submit" className={primaryBtn}>➕ Add Baaki</button>
             </form>
             <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6">
-              <h2 className="text-xl font-bold text-amber-900 mb-4">📥 Wasooli List</h2>
+              <h2 className="text-xl font-bold text-amber-900 mb-1">📥 Wasooli List</h2>
+              <p className="text-[11px] text-slate-400 mb-4">ℹ️ Saved on this device only for now.</p>
               {dues.length === 0 ? (
                 <p className="text-sm text-slate-500 py-8 text-center">Koi baaki nahi hai. Sab hisab saaf! 🎉</p>
               ) : (
@@ -877,7 +948,7 @@ export default function HisabApp() {
           <div className="space-y-6 mb-12 max-w-3xl">
             <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
               <h2 className="text-xl font-bold text-amber-900 mb-1">🏦 Bank & Online Accounts Management</h2>
-              <p className="text-xs text-slate-500 mb-4">Add your personal bank accounts or UPI IDs here so you can tag your transactions accurately.</p>
+              <p className="text-xs text-slate-500 mb-4">Add your personal bank accounts or UPI IDs here so you can tag your transactions accurately. Saved on this device only for now.</p>
 
               <form onSubmit={handleAddBank} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-6">
                 <div><label className={labelCls}>Account Name</label><input type="text" required placeholder="Jaise: SBI Current, Paytm" value={bankForm.name} onChange={(e) => setBankForm({ ...bankForm, name: e.target.value })} className={inputCls} /></div>
@@ -947,34 +1018,40 @@ export default function HisabApp() {
         )}
 
         {activeTab === 'Business setup' && (
-          <div className="space-y-6 max-w-2xl mb-12">
-            <form onSubmit={saveBiz} className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6 space-y-4">
-              <h2 className="text-xl font-bold text-amber-900">⚙️ Vyapaar ki Jaankari</h2>
-              <div><label className={labelCls}>Business Name</label><input type="text" placeholder="Jaise: Sharma General Store" value={biz.name} onChange={(e) => setBiz({ ...biz, name: e.target.value })} className={inputCls} /></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label className={labelCls}>Owner Name</label><input type="text" value={biz.owner} onChange={(e) => setBiz({ ...biz, owner: e.target.value })} className={inputCls} /></div>
-                <div><label className={labelCls}>Phone</label><input type="text" value={biz.phone} onChange={(e) => setBiz({ ...biz, phone: e.target.value })} className={inputCls} /></div>
-              </div>
-              <div><label className={labelCls}>GSTIN (optional)</label><input type="text" maxLength={15} placeholder="15-character GST number" value={biz.gstin} onChange={(e) => setBiz({ ...biz, gstin: e.target.value.toUpperCase() })} className={inputCls + ' tracking-widest'} /></div>
-              <div><label className={labelCls}>Address</label><textarea rows={3} value={biz.address} onChange={(e) => setBiz({ ...biz, address: e.target.value })} className={inputCls}></textarea></div>
-              <button type="submit" className={primaryBtn}>Surakshit Karein 💾</button>
-              {bizSaved && <p className="text-sm text-emerald-600 font-bold text-center">✔ Saved on this device!</p>}
-              
-              <div className="pt-4 border-t border-amber-100 text-center text-amber-900/60 text-sm signature-font">
-                Chinmoy Suryakant Band
-              </div>
-            </form>
+          <form onSubmit={saveBiz} className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6 max-w-2xl space-y-4 mb-12">
+            <h2 className="text-xl font-bold text-amber-900">⚙️ Vyapaar ki Jaankari</h2>
+            <div><label className={labelCls}>Business Name</label><input type="text" placeholder="Jaise: Sharma General Store" value={biz.name} onChange={(e) => setBiz({ ...biz, name: e.target.value })} className={inputCls} /></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><label className={labelCls}>Owner Name</label><input type="text" value={biz.owner} onChange={(e) => setBiz({ ...biz, owner: e.target.value })} className={inputCls} /></div>
+              <div><label className={labelCls}>Phone</label><input type="text" value={biz.phone} onChange={(e) => setBiz({ ...biz, phone: e.target.value })} className={inputCls} /></div>
+            </div>
+            <div><label className={labelCls}>GSTIN (optional)</label><input type="text" maxLength={15} placeholder="15-character GST number" value={biz.gstin} onChange={(e) => setBiz({ ...biz, gstin: e.target.value.toUpperCase() })} className={inputCls + ' tracking-widest'} /></div>
+            <div><label className={labelCls}>Address</label><textarea rows={3} value={biz.address} onChange={(e) => setBiz({ ...biz, address: e.target.value })} className={inputCls}></textarea></div>
+            <button type="submit" className={primaryBtn}>Surakshit Karein 💾</button>
+            {bizSaved && <p className="text-sm text-emerald-600 font-bold text-center">✔ Saved on this device!</p>}
 
-            <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6 space-y-3">
-              <h2 className="text-xl font-bold text-amber-900">💾 Backup & Restore</h2>
-              <p className="text-xs text-slate-500">Your transactions are safely stored in Neon Cloud Database! You can still backup your local dues and settings.</p>
-              <div className="flex flex-wrap gap-3">
-                <button onClick={downloadBackup} className="bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold px-4 py-2.5 rounded-xl cursor-pointer">⬇ Download Backup</button>
-                <label className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-bold px-4 py-2.5 rounded-xl cursor-pointer">
-                  ⬆ Restore from Backup
-                  <input type="file" accept=".json,application/json" onChange={restoreBackup} className="hidden" />
-                </label>
+            <div className="pt-4 border-t border-amber-100 text-center text-amber-900/60 text-sm signature-font">
+              Chinmoy Suryakant Band
+            </div>
+          </form>
+        )}
+
+        {activeTab === 'Business setup' && (
+          <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6 max-w-2xl space-y-3 mb-12">
+            <h2 className="text-xl font-bold text-amber-900">💾 Backup & Restore</h2>
+            <p className="text-xs text-slate-500">Your transactions are in the cloud database. Dues, bank accounts and business info are saved on this device only, so download a backup often and keep the file safe (for example in Google Drive). The backup includes your transactions too, but not your PIN.</p>
+            {oldLocalCount > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-2">
+                <p className="text-xs text-amber-900 font-bold">You have {oldLocalCount} old entries saved only in this browser.</p>
+                <button onClick={importOldLocal} className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg cursor-pointer">☁️ Move them to the database</button>
               </div>
+            )}
+            <div className="flex flex-wrap gap-3">
+              <button onClick={downloadBackup} className="bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold px-4 py-2.5 rounded-xl cursor-pointer">⬇ Download Backup</button>
+              <label className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-bold px-4 py-2.5 rounded-xl cursor-pointer">
+                ⬆ Restore from Backup
+                <input type="file" accept=".json,application/json" onChange={restoreBackup} className="hidden" />
+              </label>
             </div>
           </div>
         )}
@@ -1023,6 +1100,7 @@ export default function HisabApp() {
             )}
 
             <form onSubmit={handleAddTransaction} className="space-y-4">
+
               <div>
                 <label className={labelCls}>Select Country (Auto-detects Currency)</label>
                 <select
@@ -1116,7 +1194,7 @@ export default function HisabApp() {
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-amber-100">
                 <button type="button" onClick={closeModal} className="px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">Cancel</button>
-                <button type="submit" className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all cursor-pointer">Save to Cloud 🚀</button>
+                <button type="submit" disabled={saving} className="bg-amber-800 hover:bg-amber-900 disabled:opacity-50 text-amber-50 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all cursor-pointer">{saving ? 'Saving...' : 'Save Entry'}</button>
               </div>
             </form>
             <div className="mt-4 pt-3 border-t border-amber-100 text-center text-amber-900/60 text-xs signature-font">
