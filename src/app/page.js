@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react'
-import { getTransactions, saveTransaction, deleteTransaction as deleteTxServer } from '@/app/actions'
+import { getTransactions, saveTransaction, deleteTransaction as deleteTxServer } from './actions'
 
 const ramayanaSlides = [
   { name: "Shri Ram (श्री राम)", title: "Maryada Purushottam — The Supreme Ideal", deed: "Pita ke vachan hetu 14 varsh ka vanvas sweekar kiya aur asatya par satya ki vijay sthapit karke maryada ka adarsh sthapit kiya.", symbol: "🏹", badge: "Divine Epitome" },
