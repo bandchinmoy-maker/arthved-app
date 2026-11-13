@@ -145,6 +145,11 @@ export default function HisabApp() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 
+  // Live exchange rates (units of each currency per 1 INR). Falls back to the typed-in rates if offline.
+  const [liveRates, setLiveRates] = useState(null);
+  const [ratesDate, setRatesDate] = useState('');
+  const getRate = (c) => (liveRates && liveRates[c.currency] ? 1 / liveRates[c.currency] : c.rateToINR);
+
   const toggleMusic = () => {
     if (!audioRef.current) return;
     if (isPlaying) {
@@ -276,6 +281,31 @@ export default function HisabApp() {
   const byCategory = Object.entries(transactions.filter((t) => t.type === 'expense').reduce((m, t) => { const k = t.category || 'General'; m[k] = (m[k] || 0) + inr(t); return m; }, {})).sort((a, b) => b[1] - a[1]);
   const byMode = Object.entries(transactions.reduce((m, t) => { const k = t.paymentMode || 'Cash'; m[k] = (m[k] || 0) + inr(t); return m; }, {}));
 
+  // Fetch daily exchange rates (cached for 12 hours)
+  useEffect(() => {
+    const loadRates = async () => {
+      try {
+        const cached = JSON.parse(localStorage.getItem('arthved_rates') || 'null');
+        if (cached && Date.now() - cached.time < 12 * 60 * 60 * 1000) {
+          setLiveRates(cached.rates);
+          setRatesDate(cached.updated);
+          return;
+        }
+        const res = await fetch('https://open.er-api.com/v6/latest/INR');
+        const data = await res.json();
+        if (data.result === 'success' && data.rates) {
+          const updated = (data.time_last_update_utc || '').slice(0, 16);
+          localStorage.setItem('arthved_rates', JSON.stringify({ time: Date.now(), rates: data.rates, updated }));
+          setLiveRates(data.rates);
+          setRatesDate(updated);
+        }
+      } catch (err) {
+        console.error('Could not load exchange rates, using saved approximate rates', err);
+      }
+    };
+    loadRates();
+  }, []);
+
   // Music player lives here so it keeps playing when the screen changes
   useEffect(() => {
     const a = new Audio('/music.mp3');
@@ -356,7 +386,7 @@ export default function HisabApp() {
     if (!txData.text || !txData.amount) return;
     const amountVal = parseFloat(txData.amount);
     const countryObj = GLOBAL_COUNTRIES.find(c => c.country === (txData.country || 'India')) || GLOBAL_COUNTRIES[0];
-    const amountINR = Math.round(amountVal * countryObj.rateToINR * 100) / 100;
+    const amountINR = Math.round(amountVal * getRate(countryObj) * 100) / 100;
     const bankAccount = bankAccounts.some(b => b.name === txData.bankAccount) ? txData.bankAccount : (bankAccounts[0]?.name || 'Main Cash Drawer');
 
     if (txData.paymentMode === 'Credit Sales') {
@@ -597,12 +627,13 @@ export default function HisabApp() {
         <div className="pt-4 border-t border-amber-100 space-y-3">
           <div className="bg-amber-900 text-amber-100 p-2.5 rounded-xl text-[10px] shadow-inner space-y-1 border border-amber-700">
             <div className="flex items-center justify-between font-bold text-amber-300">
-              <span>🌐 Approx. Rates (vs INR)</span>
+              <span>🌐 {liveRates ? 'Daily Rates' : 'Approx. Rates'} (vs INR)</span>
             </div>
             <div className="flex justify-between text-slate-200">
-              <span>1 USD ≈ ₹86.50</span>
-              <span>1 QAR ≈ ₹22.80</span>
+              <span>1 USD ≈ ₹{getRate(GLOBAL_COUNTRIES.find((c) => c.currency === 'USD')).toFixed(2)}</span>
+              <span>1 QAR ≈ ₹{getRate(GLOBAL_COUNTRIES.find((c) => c.currency === 'QAR')).toFixed(2)}</span>
             </div>
+            <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" className="block text-[9px] text-amber-300/80 underline">Rates By Exchange Rate API{ratesDate ? ` • ${ratesDate}` : ''}</a>
           </div>
 
           <div className="bg-amber-50 border border-amber-200/60 p-3 rounded-2xl text-center shadow-inner">
@@ -900,7 +931,7 @@ export default function HisabApp() {
                   ))}
                 </select>
                 <p className="text-[10px] text-amber-700 mt-1 font-medium">
-                  ℹ️ This entry is saved in {txData.currency || 'INR'} ({txData.symbol || '₹'}) and counted in ₹ totals at an approximate rate.
+                  ℹ️ Saved in {txData.currency || 'INR'}. 1 {txData.currency || 'INR'} ≈ ₹{getRate(GLOBAL_COUNTRIES.find((x) => x.country === txData.country) || GLOBAL_COUNTRIES[0]).toFixed(4)} {liveRates ? '(daily rate)' : '(approximate)'} — used for your ₹ totals.
                 </p>
               </div>
 
