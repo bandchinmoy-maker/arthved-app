@@ -11,6 +11,7 @@
     "db:push": "npx prisma db push"
   },
   "dependencies": {
+    "@clerk/nextjs": "latest",
     "@neondatabase/serverless": "^1.2.0",
     "@prisma/client": "^6.0.0",
     "autoprefixer": "^10.6.2",
