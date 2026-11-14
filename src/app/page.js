@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { getTransactions, saveTransaction, deleteTransaction as deleteTxServer } from './actions'
+import { useAuth, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 
 const ramayanaSlides = [
   { name: "Shri Ram (श्री राम)", title: "Maryada Purushottam — The Supreme Ideal", deed: "Pita ke vachan hetu 14 varsh ka vanvas sweekar kiya aur asatya par satya ki vijay sthapit karke maryada ka adarsh sthapit kiya.", symbol: "🏹", badge: "Divine Epitome" },
@@ -139,6 +140,8 @@ const AnimStyles = () => (
 
 export default function HisabApp() {
   const [step, setStep] = useState('loading');
+  const { isLoaded, isSignedIn } = useAuth();
+  const [splashDone, setSplashDone] = useState(false);
   const [activeTab, setActiveTab] = useState('Overview');
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -448,7 +451,6 @@ export default function HisabApp() {
   }, []);
 
   useEffect(() => {
-    refreshTx();
     const timer = setTimeout(() => {
       try {
         setOldLocalCount(JSON.parse(localStorage.getItem('arthved_tx') || '[]').length);
@@ -465,10 +467,16 @@ export default function HisabApp() {
       } catch (err) {
         console.error('Could not read saved data', err);
       }
-      setStep(localStorage.getItem('arthved_user') ? 'login' : 'welcome');
+      setSplashDone(true);
     }, 2600);
     return () => clearTimeout(timer);
   }, []);
+
+  // Load this user's transactions after login; clear them after logout
+  useEffect(() => {
+    if (isSignedIn) refreshTx();
+    else if (isLoaded) { setTransactions([]); setDbStatus('loading'); }
+  }, [isSignedIn, isLoaded]);
 
   useEffect(() => {
     const slideInterval = setInterval(() => {
@@ -564,7 +572,9 @@ export default function HisabApp() {
   const totalExpense = viewTx.filter(t => t.type === 'expense').reduce((a, c) => a + inr(c), 0);
   const netBalance = totalIncome - totalExpense;
 
-  if (step === 'loading') {
+  const screen = !splashDone || !isLoaded ? 'loading' : isSignedIn ? 'dashboard' : 'welcome';
+
+  if (screen === 'loading') {
     return (
       <div className="min-h-screen bg-[#120f0c] flex flex-col items-center justify-center font-sans text-amber-100 overflow-hidden relative">
         <AnimStyles />
@@ -594,7 +604,7 @@ export default function HisabApp() {
     );
   }
 
-  if (step === 'welcome') {
+  if (screen === 'welcome') {
     return (
       <div className={screenCls + " relative"}>
         <AnimStyles />
@@ -611,73 +621,10 @@ export default function HisabApp() {
           <h2 className="text-2xl font-black text-slate-900 mb-1">Welcome to ArthVed</h2>
           <p className="text-xs text-slate-500 mb-6">Surya ki urja, Nayan ki drishti — har hisab ekdam saaf.</p>
           <div className="space-y-3">
-            <button onClick={() => setStep('register')} className={primaryBtn}>✨ New User (Register Vault)</button>
-            <button onClick={() => setStep('login')} className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm rounded-xl transition cursor-pointer">🔑 Old User (Unlock Vault)</button>
+            <SignUpButton mode="modal"><button className={primaryBtn}>✨ Create Free Account</button></SignUpButton>
+            <SignInButton mode="modal"><button className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm rounded-xl transition cursor-pointer">🔑 Log In</button></SignInButton>
           </div>
           <div className="mt-6 pt-4 border-t border-amber-100 text-amber-900/60 text-sm signature-font">
-            Chinmoy Suryakant Band
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 'register') {
-    return (
-      <div className={screenCls + " relative"}>
-        <AnimStyles />
-        <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full border border-amber-200">
-          <h2 className="text-xl font-black text-amber-900 mb-1">Create Your Vault</h2>
-          <p className="text-xs text-slate-500 mb-6">Set your name and a PIN to protect your accounts on this device.</p>
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div>
-              <label className={labelCls}>Full Name / Vyapaar Name</label>
-              <input type="text" required placeholder="Enter your name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>WhatsApp Number for Recovery</label>
-              <input type="text" placeholder="10-digit number" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>Set Secure PIN or Password</label>
-              <input type="password" required placeholder="Enter PIN (e.g. 1234 or word)" value={formData.pin} onChange={(e) => setFormData({ ...formData, pin: e.target.value })} className={inputCls + ' tracking-widest'} />
-            </div>
-            <button type="submit" className={primaryBtn + ' mt-2'}>INITIALIZE ARTHVED VAULT 🚀</button>
-            <button type="button" onClick={() => setStep('welcome')} className="w-full text-xs text-slate-500 hover:underline mt-2 text-center block">← Back to Welcome</button>
-          </form>
-          <div className="mt-6 text-center text-amber-900/60 text-sm signature-font">
-            Chinmoy Suryakant Band
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 'login') {
-    return (
-      <div className={screenCls + " relative"}>
-        <AnimStyles />
-        <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full border border-amber-200 text-center">
-          <div className="w-12 h-12 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">🔒</div>
-          <h2 className="text-2xl font-black text-slate-900 mb-1">Unlock ArthVed Vault</h2>
-          <p className="text-xs text-slate-500 mb-6">Enter your PIN or Password</p>
-          <input
-            type="password"
-            value={enteredPin}
-            onChange={(e) => setEnteredPin(e.target.value)}
-            placeholder="••••"
-            className={`w-full px-4 py-3 border rounded-xl mb-2 focus:outline-none text-center tracking-widest text-lg font-bold bg-amber-50/20 ${pinError ? 'border-rose-500' : 'border-amber-200'}`}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
-          />
-          {pinError && <p className="text-xs text-rose-500 mb-4 font-medium">Wrong PIN! Please try again.</p>}
-          <button onClick={handleLogin} className={primaryBtn}>Unlock Dashboard 🔓</button>
-          <button
-            onClick={() => { if (window.confirm('This removes your PIN and your dues, bank accounts and business info from this device. Your transactions in the database are NOT deleted. Continue?')) handleResetVault(); }}
-            className="mt-4 text-xs text-slate-400 hover:underline block mx-auto font-medium"
-          >
-            Reset Vault / Register New Account
-          </button>
-          <div className="mt-6 text-amber-900/60 text-sm signature-font">
             Chinmoy Suryakant Band
           </div>
         </div>
@@ -805,9 +752,7 @@ export default function HisabApp() {
             Chinmoy Suryakant Band
           </div>
 
-          <button onClick={handleLock} className="w-full py-2 px-4 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer">
-            <span>🔒</span> Lock Vault
-          </button>
+          <div className="flex items-center justify-center gap-2 py-1"><UserButton /><span className="text-xs font-bold text-slate-500">My Account</span></div>
         </div>
       </aside>
 
@@ -822,7 +767,7 @@ export default function HisabApp() {
               <span>➕</span> Add Sale / Expense
             </button>
             <button onClick={toggleMusic} className="md:hidden bg-amber-100 text-amber-900 px-3 py-2.5 rounded-xl font-bold text-sm cursor-pointer">{isPlaying ? '⏸' : '🎵'}</button>
-            <button onClick={handleLock} className="md:hidden bg-slate-100 text-slate-700 px-3 py-2.5 rounded-xl font-bold text-sm cursor-pointer">🔒</button>
+            <div className="md:hidden"><UserButton /></div>
           </div>
         </header>
 
