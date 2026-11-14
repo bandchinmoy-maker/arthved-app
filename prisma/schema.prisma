@@ -21,4 +21,7 @@ model Transaction {
   symbol      String   @default("₹")
   date        String
   createdAt   DateTime @default(now())
+  userId      String   @default("")
+
+  @@index([userId])
 }
