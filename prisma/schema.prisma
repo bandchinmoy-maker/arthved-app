@@ -11,9 +11,14 @@ model Transaction {
   id          String   @id @default(cuid())
   text        String
   amount      Float
-  type        String
-  category    String
-  paymentMode String
+  amountINR   Float?
+  type        String   @default("income")
+  category    String   @default("General")
+  paymentMode String   @default("Cash")
+  bankAccount String   @default("Main Cash Drawer")
+  country     String   @default("India")
+  currency    String   @default("INR")
+  symbol      String   @default("₹")
   date        String
   createdAt   DateTime @default(now())
 }
